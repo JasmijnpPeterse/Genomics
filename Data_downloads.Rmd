@@ -1,0 +1,15 @@
+---
+title: "Downloaden"
+output: html_document
+date: "2026-09-14"
+---
+```{bash SRA_download, eval=FALSE}
+prefetch $(</homes/jrjpeterse/Genomics/SRR_Acc_List.txt) --output-directory \
+/students/2026-2027/Thema05/Groep3/SRA
+```
+
+
+```{bash extract_fastq, eval=FALSE}
+find /students/2026-2027/Thema05/Groep3/SRA -name "*.sra" | \
+parallel 'fasterq-dump -O /students/2026-2027/Thema05/Groep3/fastq/ {}'
+```
