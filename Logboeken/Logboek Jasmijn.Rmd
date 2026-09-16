@@ -1,0 +1,64 @@
+---
+title: "Logboek Jasmijn"
+output: html_document
+date: "2026-09-15"
+---
+
+## ../../..
+### Doel
+### Motivatie
+### Uitgevorede werkzaamheden
+### Resultaten
+### Conclusie
+### Volgende stap
+
+# Logboek Jasmijn
+## 13/09/2026 
+### Doel: 
+Samenvatten van ons gekozen artikel over hoe gist reageert op ethanol stress.
+(https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528) 
+### Motivatie: 
+Dinsdag is de presentatie dus ik maak het liever vandaag al zodat ik het niet last minute hoef te doen, en zodat ik minder stress heb
+### Uitgevoerde werkzaamheden: 
+De samenvatting
+### Resultaten 
+Mijn samenvatting (https://docs.google.com/document/d/1k2wYKrGZMdxGFDWmonYJuurFLbNxj8qxIpaRrhwoJ_w/edit?usp=sharing)
+### Conclusie
+Duurde even, maar was een erg interresant artikel om te lezen
+### Volgende stap: 
+Het presenteren van de samenvatting
+
+## 14/09/2026
+### Doel
+Ik begon de dag zonder doel maar tijdens de dag was het om de data te downloaden
+### Motivatie
+Ik ben op school dus ik wil er niet voor niets zitten
+### Uitgevorede werkzaamheden
+Ik heb voor de presentatie mijn samenvatting een beetje aangepast waardoor het iets soepeler te vertellen is. Ook heb ik een code geschreven om onze data te downloaden
+```{bash SRA_download, eval=FALSE}
+prefetch $(</homes/jrjpeterse/Genomics/SRR_Acc_List.txt) --output-directory \
+/students/2026-2027/Thema05/Groep3/SRA
+```
+
+```{bash extract_fastq, eval=FALSE}
+find /students/2026-2027/Thema05/Groep3/SRA -name "*.sra" | \
+parallel 'fasterq-dump -O /students/2026-2027/Thema05/Groep3/fastq/ {}'
+```
+### Resultaten
+Het downloaden is gelukt, en staat netjes in de map. 
+### Conclusie
+Nu dat onze data is gedownload kunnen we verder met ons project.
+### Volgende stap
+De presentatie morgen geven en bedenken hoe we de code willen schrijven.
+
+## 15/09/2026
+### Doel
+Een nette presentatie geven
+### Motivatie
+Ik wil het jaar goed beginnen.
+### Uitgevorede werkzaamheden
+We hebben de presentatie gegeven
+### Resultaten
+De presentatie ging prima, had wel beter gekund. 
+### Conclusie
+### Volgende stap
