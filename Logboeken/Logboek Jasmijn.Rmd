@@ -59,6 +59,28 @@ Ik wil het jaar goed beginnen.
 ### Uitgevorede werkzaamheden
 We hebben de presentatie gegeven
 ### Resultaten
-De presentatie ging prima, had wel beter gekund. 
+De presentatie ging prima, had wel beter gekund.Ik vergat mijn hele samenvatting waardoor ik moeite had met het presenteren. De feedback hebben we nog niet binnen.
+### Conclusie
+Ik had beter mijn samenvatting moeten leren, zodat dit niet had kunnen gebeuren
+### Volgende stap
+De volgende les gaat we het genoom van de gist downloaden en een begin maken in het progameren.
+
+## 16/09/2026
+### Doel
+### Motivatie
+### Uitgevorede werkzaamheden
+### Resultaten
 ### Conclusie
 ### Volgende stap
+
+## 21/09/2026
+### Doel
+### Motivatie
+### Uitgevorede werkzaamheden
+Achter gekomen sample assecion list verkeerd gedownload
+alle behalve ..11 en ...16 verwijderen
+jrjpeterse@assemblix2019:/students/2026-2027/Thema05/Groep3/fastq$ seqtk sample -s 696769 SRR11923116.fastq 100000 > Jy304_prestress.fastq
+### Resultaten
+### Conclusie
+### Volgende stap
+
