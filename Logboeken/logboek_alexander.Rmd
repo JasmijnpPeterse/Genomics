@@ -1,0 +1,214 @@
+---
+title: "Logboek genomics"
+author: "Alexander Fluttert"
+date: "6-9-2026"
+output: html_notebook
+---
+
+
+## Introductie
+
+
+## Data
+De data die wij gebruiken is een deel van de data van het volgende artikel: https://doi.org/10.1371/journal.pone.0239528 of de link direct naar de data: https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa . uit deze data hebben wij voor ons experiment gekozen uit de pre-stress RNA-seq data van beide stammen (wildtype en JY304). dit zijn samples SRR11923111 (wildtype) en SRR11923116 (JY304).
+
+## 6/9/2026
+
+### doel van de dag
+een artikel vinden om ons onderzoek op te bouwen
+### motivatie van aanpak
+
+### uitgevoerde werkzaamheden
+vandaag hebben wij gekeken naar onderzoeken die ons interessant lijken. Er is op ncbi gezocht naar de zoekterm: 'Genome variation profiling by high throughput sequencing'. daaruit is het artikel dat bij resultaten beschreven staat gekomen voor genomics. verder hebben wij dat artikel doorgenomen.
+
+### resultaten
+het volgende artikel is uitgekozen https://pubmed.ncbi.nlm.nih.gov/33170850/ 
+
+### conclusie en vervolgstappen
+wij hebben het artikel gevonden, nu gaan wij het goed doornemen voor de volgende les.
+
+
+## 11/9/2026
+
+### doel van de dag
+Het doel van vandaag is om een begin te maken aan de presentatie van het plan van aanpak. 
+
+### motivatie van aanpak
+wij hebben gekozen voor deze taak omdat er vandaag is aangekondigd dat wij dinsdag de 15e een presentatie voor ons plan van aanpak moeten geven.
+
+### uitgevoerde werkzaamheden
+vandaag hebben wij door de halve les en afwezigheid van een groepslid een algemene layout van de presentatie gemaakt op Teams en het artikel goed doorgenomen om de in de paper gebruikte tools voor genomic te vinden. verder is er nog een onderzoeksvraag bedacht om uit te zoeken.
+
+### resultaten
+de in het experiment gevonden tools zijn vooral gebruikt voor transcriptomics en niet bij genomics. sowieso is het onderzoek wat zij hebben uitgevoerd een transcriptomics onderzoek en hebben zij niet echt een specifiek genomics onderzoek gedaan. hierdoor hebben wij gekozen om de onderzoeksvraag van ons onderzoek te maken: "zijn de genen die voor ethanolresistentie zorgen te vinden door een wildtype gist en een speciale strain (JY304 strain) te vergelijken."
+
+
+### conclusie en vervolgstappen
+
+
+## 13/9/2026
+
+### doel van de dag
+vandaag is het doel om voor de presentatie een rolverdeling te maken en een grote start (hopelijk een eind) aan de presentatie. 
+
+### motivatie van aanpak
+omdat wij een presentatie moeten geven willen wij deze goed voorbereiden. daarnaast is het een goed idee om zelf ook nog eens een goed inzicht te krijgen op wat wij nou precies willen doen. 
+
+### uitgevoerde werkzaamheden
+vandaag is de rolverdeling van de presentatie gemaakt, zie resultaten voor de details hiervan. omdat ons gekozen onderzoek veel met transcriptomics doet en eigenlijk vrij weinig met genomics heb ik gewerkt aan het zoeken van tools. ook heb ik vanwege dezelfde reden een onderzoeksvraag voor ons moeten bedenken.
+
+### resultaten
+Jasmijn gaat zich vooral bezighouden met het uitgevoerde experiment, wat zij hebben gedaan en hoe zij dit hebben gedaan. Oscar gaat zich bezighouden met de data, wat deze betekend en welke data wij gaan gebruiken vanuit het experiment. ik ga mij vooral bezighouden met de pijplijn, welke tools wij gaan gebruiken en wat die tools doen. daarnaast laat ik kort weten wat wij willen onderzoeken. het is helaas nog niet gelukt om de presentatie af te maken, alle tools zijn al wel gevonden. de onderzoeksvraag die ik heb bedacht is: "welke genen zijn bij gist betrokken bij de ethanolresistentie"
+
+### conclusie en vervolgstappen
+alle tools zijn al wel gevonden, de precieze werking hiervan moet alleen nog wel uitgezocht worden. verder moet de presentatie nog een beetje netjes worden gemaakt, maar de prioriteit ligt bij de inhoud hiervan. 
+
+
+## 14/9/2026
+
+### doel van de dag
+uitzoeken wat de precieze werking is van de tools die wij in onze pijplijn willen gebruiken. 
+
+### motivatie van aanpak
+om zelf een goed beeld te krijgen bij wat we precies moeten doen en omdat we dit als pva moeten presenteren morgen. 
+
+### uitgevoerde werkzaamheden
+vandaag heb ik, zoals bij het doel van de dag vermeld, de precieze werking van onze tools uitgezocht. wat ik hiermee bedoel, is dat ik heb uitgezocht welke tools/commando's bij onze pijplijn van pas zijn. ik heb hiernaar gezocht op de websites van de tools zelf (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/ voor fastqc, http://www.usadellab.org/cms/index.php?page=trimmomatic voor trimmomatic, https://github.com/bwa-mem2/bwa-mem2/blob/master/README.md voor bwa-mem2, 
+https://www.htslib.org voor samtools en bcftools). verder hebben wij als groep onderzocht hoe wij de datasets op het schoolsysteem kunnen downloaden. dit hebben wij gedaan door eerst de accession list van onze data te downloaden. de accession list hebben wij gedownload op https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa. hierna hebben wij doormiddel van het volgende commando deze data op het systeem gedownload, uitgevoerd in de webversie van rstudio van de hanze.
+dit is met de tool SRAtools gedaan.
+```{bash SRA_download, eval=FALSE}
+prefetch $(</homes/jrjpeterse/Genomics/SRR_Acc_List.txt) --output-directory \
+/students/2026-2027/Thema05/Groep3/SRA
+```
+hiermee zijn de SRA bestanden van ons experiment op de schoolsystemen gedownload. de bedoeling was om alleen de samples SRR11923116 en SRR11923111 (de pre-stress rna data van het wildtype en de JY304 strain) te downloaden, maar ik geloof dat wij per ongeluk alle 16 bestanden van het experiment hebben gedownload. dit is geen probleem voor ons, aangezien wij relatief kleine bestanden hebben, maar dit is een verbeterpuntje voor in het vervolg. nadat wij de .SRA bestanden hebben gedownload, hebben wij deze ook uitgepakt naar fastq-bestanden, doormiddel van het volgende commando uit te voeren op de webversie van Rstudio van de hanze
+```{bash extract_fastq, eval=FALSE}
+find /students/2026-2027/Thema05/Groep3/SRA -name "*.sra" | \
+parallel 'fasterq-dump -O /students/2026-2027/Thema05/Groep3/fastq/ {}'
+```
+
+### resultaten
+ik heb de voor ons relevante commando's van de tools uitgezocht. dit is vooral voor bcftools en samtools relevant, aangezien dit een verzameling is van commando's in een tool. hieruit is gekomen dat wij de commando's samtools view moeten gebruiken en voor bcftools de commando's mpileup en call.
+
+### conclusie en vervolgstappen
+morgen is de presentatie. hier krijgen wij commentaar van onze docenten op wat ons plan is. dat gaan wij gebruiken om verder te bouwen op wat wij precies moeten doen. voor nu heb ik het mijn deel van de presentatie af. 
+
+
+### ps na presentatie 
+gebruik star i.p.v. bwa mem2. dit zal rekening houden met het feit dat onze data bestaat uit exonen, aangezien het rna samples zijn
+
+
+
+## 21/9/2026
+
+### doel van de dag
+het doel van vandaag is om subsets te maken van de eerder gedownloade data. eerst moeten wij erachter komen welke tools er te gebruiken zijn
+
+### motivatie van aanpak
+wij willen aan het eind van deze week read mapping gedaan hebben. hiervoor moeten wij samples gaan maken van onze data en verder moeten wij nog een quality control doen zodat we inzicht hierover krijgen. 
+
+### uitgevoerde werkzaamheden
+
+eerst hebben wij gekeken naar hoe wij subsets maken van onze data. hiervoor hebben wij in de terminal het linux commando apropos gebruikt. dit is gerunt als het volgende:
+
+```{bash eval=FALSE}
+apropos fastq
+```
+
+hier hebben wij een aantal opties uit gekregen en hebben wij gekozen om onze subsets te maken door middel van seqtk. door seqtk te runnen in de terminal zijn wij achter seqtk sample gekomen en zijn wij verder gaan kijken naar hoe wij ons commando moeten runnen. door te kijken op https://github.com/lh3/seqtk/blob/master/README.md zijn wij bij het volgende commando gekomen:
+
+``` {bash eval=FALSE}
+# wildtype sample
+seqtk sample -s 676967 SRR11923111 100000 > wildtype_prestress.fastq
+
+#jy304 sample 
+seqtk sample -s 676967 SRR11923116 100000 > wildtype_prestress.fastq
+
+```
+
+deze subsets hebben wij geplaatst naar de folder students/2026-2027/thema05/groep3/subset. op deze subsets hebben wij de tool fastqc gebruikt. dit hebben wij gedaan om de kwaliteit van onze data te kunnen approximeren. om fastqc te runnen hebben wij het volgende commando gebruikt:
+
+```{bash eval=FALSE}
+#wildtype
+fastqc /students/2026-2027/Thema05/Groep3/subset/wildtype_prestress.fastq --outdir /students/2026-2027/Thema05/Groep3/subset/qc
+#jy304 strain
+fastqc /students/2026-2027/Thema05/Groep3/subset/jy304_prestress.fastq --outdir /students/2026-2027/Thema05/Groep3/subset/qc
+
+``` 
+
+verder hebben wij de bestanden die wij te veel hebben gedownload nu verwijderd uit onze map, zodat deze later geen verwarring op gaan leveren. daarnaast hebben wij de rechten moeten aanpassen voor bestanden en voor directories met:
+
+```{bash eval=FALSE}
+chmod 777 [file/directory name].
+```
+
+### resultaten
+
+uit de runs van seqtk zijn 2 subsets van onze data gekomen. wij hebben gekozen om deze subsets 100000 reads te maken. 
+
+de resultaten van de runs van fastqc op onze samples zijn html bestanden die de kwaliteit van onze data weergeven. in beide bestanden hebben wij waarschuwingen bij de volgende punten: 
+- per base sequence quality; dit betekend dat bij minimaal een base de lower quartile minder is dan 10 of de median van een base minder is dan 25. dit is waarschijnlijk door degradatie van de rna moleculen tijdens het sequencen. een optie om dit te fixen is om de data nog een keer te trimmen op kwaliteit.
+
+- per base sequence content; dit betekend dat er een verschil in de A en T of C en G groteer is dan 10% op een positie. deze waarschuwing is waarschijlijk ontstaan omdat onze data RNA-seq is en (volgens fasqc) is geproduceerd door middel van willekeurige hexameren. dit zorgt voor een "intrinsic bias" in de data. verder wordt er door fastqc gezegt dat dit meestal geen grote effecten hebben op de downstream analyse.
+
+- overrepresented sequences; dit betekend dat er een of meerdere sequenties zijn die meer dan 0.1% zijn van het totale aantal sequenties. deze module wordt vaak getriggered wanneer hij gebruikt wordt om kleine RNA-libraries te anyliseren waarin de sequenties niet aan willekeurige fragmentatie doen. daardoor is dezelfde sequentie van nature vaak aanwezig in een significante proportie van onze data. 
+
+verder hebben wij een foutmelding bij adapter content. dit betekend dat er een sequentie aanwezig is in meer dan 10% van alle reads. fastqc geeft aan dat dit de illumina universal adapter is. fastqc geeft zelf ook aan dat dit niet per sé een probleem hoeft te zijn maar dat er nog wel adapter trimming plaats moet vinden voordat er vedere analyse gedaan kan worden op de data. 
+
+
+### conclusie en vervolgstappen
+onze data is voldoende om te gebruiken voor onze pijplijn. de vervolgstappen die wij moeten doen zijn door middel van star read mapping, quality trimming en adapter trimming te doen.
+
+
+
+## 23/9/2026
+
+### doel van de dag
+ik wil vandaag vooral zorgen dat mijn logboek op orde is en mogelijk zelf oefenen met tools zoals bijvoorbeeld multiqc. als er nog tijd is dan ga ik verder met STAR om onze sequentie te mappen/filteren.
+
+### motivatie van aanpak
+vandaag is helaas het groepje (naast mij) afwezig.daarom kies ik er voor om dingen voor het project te doen die vooral voordelig/leerzaam zijn voor mijzelf. 
+
+### uitgevoerde werkzaamheden
+ik heb gezocht hoe ik multiqc moet gebruiken. hiervoor heb ik op https://docs.seqera.io/multiqc/getting_started/running_multiqc gevonden hoe ik de tool moet runnen. voordat ik de tool heb gerunt, ben ik eerst door middel van "cd" naar de map met onze fastqc data genavigeerd (/students/2026-2027/Thema05/Groep3/subset/quality_control). toen ik in de map stond, heb ik het volgende commando gerunt:
+
+```{bash eval=FALSE}
+multiqc .
+```
+
+hiermee heb ik een output gekregen in de vorm van een mapje met .txt en .json bestanden en de daadwerkelijke multiqc_report.html. de output van deze multiqc run heeft mij bijna geen plots gegeven, maar wel een output bij de per base sequence content. dit betekend dat de data wel is gebruikt, maar de tool blijkbaar geen visuele output heeft gegeven bij de meeste punten van een fastqc. daarnaast is het best wel opmerkelijk dat het multiqc bestand vast blijft zitten op "loading report". dit zou mogelijk verklaren waarom de plots nog niet te zien zijn, maar zou niet zo lang nodig moeten hebben. door hulp van Ronald in te schakelen ben ik er achter gekomen dat de tool zoekt naar een bepaalde javascript folder en die niet kan vinden waar het programma hem verwacht. daarom heb ik de keuze gemaakt om een virtual environment aan te maken en daarin de multiqc module te installeren. dit heb ik gedaan door naar de map /students/2026-2027/Thema05/Groep3/subset/quality_control te navigeren en daar het volgende commando te runnen: 
+
+```{bash eval=FALSE}
+python3 -m venv venv
+#hierna heb ik de virtual environment geactiveerd door middel van het volgende commando, terwijl ik in dezelfde map stond:
+source bin/activate
+#daarna heb ik in de virtual environment de multiqc geinstalleerd met:
+pip install multiqc
+#na de installatie heb ik het volgende commando gerunt in de /students/2026-2027/Thema05/Groep3/subset/quality_control/venv:
+multiqc ..
+```
+
+helaas bracht dit mij weer hetzelfde probleem, namelijk dat de plots niet gemaakt werden. wel gaf hij mij weer een nuttige foutmelding, namelijk dat ik kaleido geupdate moest worden. dit heb ik gedaan door:
+
+```{bash eval=FALSE}
+pip install --upgrade "kaleido>=1"
+```
+
+na het runnen van dit commando heb ik opnieuw geprobeerd om multiqc aan te roepen met het eerder genoemde commando. dit gaf mij de foutmelding dat er op het systeem geen google chrome stond. door deze foutmelding ben ik vanuit de assemblix server teruggegaan naar mijn nuc (nuc406).
+
+### resultaten
+
+### conclusie en vervolgstappen
+
+
+
+## 
+
+### doel van de dag
+
+### motivatie van aanpak
+
+### uitgevoerde werkzaamheden
+
+### resultaten
+
+### conclusie en vervolgstappen
