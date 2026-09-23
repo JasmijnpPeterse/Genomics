@@ -199,11 +199,21 @@ na het runnen van dit commando heb ik opnieuw geprobeerd om multiqc aan te roepe
 multiqc -p ..
 ```
 
-dit zorgt er voor dat de foto's in een andere folder worden gezet. 
+dit zorgt er voor dat de foto's in een andere folder worden gezet. hierdoor kan ik zien of ze uberhaupt zijn aangemaakt of niet. na deze run waren de plots wel gemaakt, maar kon ik ze nog steeds niet in het html bestand zien. daarom heb ik het html bestand geopend in een andere browser en daarin werkten ze wel. het bestand is te vinden als /students/2026-2027/Thema05/Groep3/subset/quality_control/venv/multiqc_report_2.html . 
+
+tijdens het updaten van mijn logboek moest ik nog mijn ssh van de schoolcomputers in github zetten om de repo ook op deze systemen te krijgen. bij het maken van de commit van mijn logboek liep ik aan tegen de standaard text editor van de commit messages. ik heb dit in de eerste instantie omzeilt met git commit -m, maar om dit voor later nog op te lossen heb ik het volgende commando gerund, met behulp van ronald:
+
+```{bash eval=FALSE}
+git config --global core.editor "nano" 
+```
+
+hierdoor is mijn standaard texteditor voor git veranderd naar nano (wat ik wel snap).
+
 ### resultaten
+een multiqc met daarin de data van onze beide fastqc bestanden in een enkel bestand. of dit bestand zelf een functie heeft voor ons project is nog een vraag, maar het klaarzetten van de tool en de foutmeldingen oplossen is zeker een leerzaam process geweest. verder is mijn github ook werkzaam gemaakt op de schoolcomputers. 
 
 ### conclusie en vervolgstappen
-
+de mapping moet nog gedaan worden. daar wil ik de volgende keer volop mee bezig, zodat de variant calling ook zsm gedaan kan worden.
 
 
 ## 
