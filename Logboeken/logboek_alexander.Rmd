@@ -193,8 +193,13 @@ helaas bracht dit mij weer hetzelfde probleem, namelijk dat de plots niet gemaak
 pip install --upgrade "kaleido>=1"
 ```
 
-na het runnen van dit commando heb ik opnieuw geprobeerd om multiqc aan te roepen met het eerder genoemde commando. dit gaf mij de foutmelding dat er op het systeem geen google chrome stond. door deze foutmelding ben ik vanuit de assemblix server teruggegaan naar mijn nuc (nuc406).
+na het runnen van dit commando heb ik opnieuw geprobeerd om multiqc aan te roepen met het eerder genoemde commando. dit gaf mij de foutmelding dat er op het systeem geen google chrome stond. door deze foutmelding ben ik vanuit de assemblix server teruggegaan naar mijn nuc (nuc406). hier heb ik het commando net wat anders gerund, namelijk:
 
+```{bash eval=FALSE}
+multiqc -p ..
+```
+
+dit zorgt er voor dat de foto's in een andere folder worden gezet. 
 ### resultaten
 
 ### conclusie en vervolgstappen
