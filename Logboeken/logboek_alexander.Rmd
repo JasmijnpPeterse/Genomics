@@ -222,6 +222,7 @@ de mapping moet nog gedaan worden. daar wil ik de volgende keer volop mee bezig,
 het doel van vandaag is om de read mapping uit te voeren met STAR en om de variant calling te doen met bcftools. 
 
 ### motivatie van aanpak
+om onze uiteindelijke vergelijking te doen moeten wij eerst de reads mappen en daarna nog de varianten vinden.
 
 ### uitgevoerde werkzaamheden
 het eerste wat wij moeten doen om met STAR de read mapping uit te voeren is het referentiegenoom downloaden. wij hebben gekozen voor het S288C referentiegenoom van gist, te vinden op https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000146045.2/ . deze data hebben wij gedownload als "refseq only", "genome sequences (FASTA)" en "annotation features (GTF)". deze heb ik daarna verplaatst naar de folder /students/2026-2027/Thema05/Groep3/subset/quality_control. de GCF-file van de sequentie en de .gtf-file heb ik daarna verplaatst naar de map /students/2026-2027/Thema05/Groep3/subset. daarna ben ik zelf genavigeerd naar de map en heb ik het volgende commando gerund van STAR om een index te maken van het referentiebestand:
@@ -245,6 +246,12 @@ STAR --runMode genomeGenerate --genomeFastaFiles GCF_000146045.2_R64_genomic.fna
 ```
 
 het uitvoeren van dit commando lukte wel zonder foutmeldingen! hieruit hebben wij een geindexte versie van ons genoom.
+in dit commando doen de tweaks het volgende:
+--runMode: dit geeft aan dat wij STAR gebruiken om een index te maken
+--genomeFastaFiles: hiermee bepaal je welk bestand het genoom is.
+--sjdbGTFfile: hiermee geef je aan welk bestand het gtf bestand is voor het genoom
+--sjdbOverhang: dit is hoe ver STAR om een splice site heen kijkt. aangeraden was om dit de read length -1 te maken.
+--genomeSAindexNbases: Grootte van de index, de default is 14. wij hebben 10 gebruikt als aanrader van STAR. 
 
 ```{bash eval=FALSE}
 #gerunt op de map /students/2026-2027/Thema05/Groep3/subset
@@ -255,7 +262,16 @@ STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress.fastq --outFileNameP
 STAR --genomeDir GenomeDir --readFilesIn jy304_prestress.fastq --outFileNamePrefix jy304_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts
 ```
 
+de tweaks van STAR in deze run doen het volgende: 
+--genomeDir: hier geef je aan in welke directory het (geindexeerde) genoom staat
+--readFilesIn: dit geeft aan welk bestand je wilt gebruiken om te mappen
+--outFileNamePrefix: STAR maakt meerdere bestanden. hiermee geef je aan waar die namen mee beginnen.
+--outSAMtype: dit is het type outputbestand
+--outSAMattributes: hier kan je voor sam/bam bestanden verschillende tags toevoegen (zie https://samtools.github.io/hts-specs/SAMtags.pdf voor meer informatie)
+--quantMode: dit zorgt ervoor dat STAR een extra outputbestand maakt met daarin de gene counts (hoeveel reads per gen). bij nader inzien gaan wij deze niet gebruiken, dus zou dit in de toekomst weggelaten kunnen worden.
+
 dit was succesvol. om daarna inzicht te krijgen op de gemapte bestanden die wij hebben hebben wij het volgende commando gerunt:
+
 ```{bash eval=FALSE}
 samtools flagstat /students/2026-2027/Thema05/Groep3/subset/star/wildtype_prestress/wildtype_prestressAligned.sortedByCoord.out.bam
 ```
@@ -278,11 +294,47 @@ hieruit kwam het volgende:"
 0 + 0 with mate mapped to a different chr
 0 + 0 with mate mapped to a different chr (mapQ>=5)
 "
-dit betekend dat 100% van onze subset gemapt is aan het genoom.
+dit betekend dat 100% van onze subset gemapt is aan het genoom. wel is het opmerkelijk dat de subset maar 100000 samples was en STAR meer dan 100000 maps heeft, maar dit is waarschijnlijk doordat er meerdere plekken zijn waar sommige samples passen.
+
+om hierna de variant calling te doen, hebben wij gekozen voor bcftools. hiermee moeten wij eerst een pileup-bestand maken en daarna de daadwerkelijke variant calling. de pileup hebben wij eerst gekeken wat de parameters voor het commando zijn op https://samtools.github.io/bcftools/howtos/variant-calling.html. hier kwam uit dat de "-f" en "-o" vooral belangrijk was om het referentiegenoom en . het commando hebben wij als volgt gerunt:
+```{bash eval=FALSE}
+#voor het wildtype
+bcftools mpileup -f /students/2026-2027/Thema05/Groep3/subset/GCF_000146045.2_R64_genomic.fna -o /students/2026-2027/Thema05/Groep3/subset/mpileup_output/wildtype_pileup /students/2026-2027/Thema05/Groep3/subset/star/wildtype_prestress/wildtype_prestressAligned.sortedByCoord.out.bam
+
+#voor de jy304 strain
+bcftools mpileup -f /students/2026-2027/Thema05/Groep3/subset/GCF_000146045.2_R64_genomic.fna -o /students/2026-2027/Thema05/Groep3/subset/mpileup_output/jy304_pileup /students/2026-2027/Thema05/Groep3/subset/star/jy304_prestress/jy304_prestressAligned.sortedByCoord.out.bam
+```
+
+hieruit hebben we 2 pileup-files gekregen die wij kunnen gebruiken voor de variant calling. om achter de mogelijke parameters te komen hebben wij "bcftools call" in de terminal gerunt. hieruit kwamen de volgende parameters:
+-mv: dit geeft een multiallelic caller en alleen maar variants. 
+-Ov: dit geeft de output als een vcf-bestand
+-o: het outputbestand
+
+```{bash eval=FALSE}
+#voor het wildtype
+bcftools call -mv -Ov -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/wildtype_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/wildtype_pileup
+
+#voor de jy304 strain
+bcftools call -mv -Ov -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/jy304_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/jy304_pileup
+```
+
+bcftools is er zelf van uitgegaan dat onze cellen diploid zijn. nadat wij terug hebben gekeken in het originele experiment op pubmed, zijn wij er achter gekomen dat onze gistcellen haploid zijn. daarom hebben wij het opnieuw gerunt op de volgende manier: 
+
+```{bash eval=FALSE}
+#voor het wildtype
+bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/wildtype_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/wildtype_pileup
+
+#voor de jy304 strain
+bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/jy304_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/jy304_pileup
+```
 
 ### resultaten
+wij hebben voor beide strains nu de read mapping gedaan, een pileupbestand gemaakt en de variant calling gedaan. de bestanden voor de read mapping zijn te vinden onder de map /students/2026-2027/Thema05/Groep3/subset/star . de pileupbestanden zijn te vinden onder de folder /students/2026-2027/Thema05/Groep3/subset/mpileup_output en de variant calling bestanden zijn te vinden onder de map /students/2026-2027/Thema05/Groep3/subset/variant_calls.
 
 ### conclusie en vervolgstappen
+
+vandaag was een succes. we hebben de stappen van onze pijplijn gedaan die wij moesten uitvoeren ook daadwerkelijk gedaan. wat wij nu nog moeten doen is nadenken hoe wij de daadwerkelijke analyse gaan doen. wij willen namelijk een subtraction analysis doen, waar wij dus de varianten van het wildtype van de varianten van de jy304 strain willen aftrekken om te kijken of wij de genen kunnen vinden die voor alcoholresistentie zorgen. er moet nog uitgezocht worden hoe dit gedaan moet worden.
+
 
 
 ## 
