@@ -216,6 +216,75 @@ een multiqc met daarin de data van onze beide fastqc bestanden in een enkel best
 de mapping moet nog gedaan worden. daar wil ik de volgende keer volop mee bezig, zodat de variant calling ook zsm gedaan kan worden.
 
 
+## 25/9/2026 
+
+### doel van de dag
+het doel van vandaag is om de read mapping uit te voeren met STAR en om de variant calling te doen met bcftools. 
+
+### motivatie van aanpak
+
+### uitgevoerde werkzaamheden
+het eerste wat wij moeten doen om met STAR de read mapping uit te voeren is het referentiegenoom downloaden. wij hebben gekozen voor het S288C referentiegenoom van gist, te vinden op https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000146045.2/ . deze data hebben wij gedownload als "refseq only", "genome sequences (FASTA)" en "annotation features (GTF)". deze heb ik daarna verplaatst naar de folder /students/2026-2027/Thema05/Groep3/subset/quality_control. de GCF-file van de sequentie en de .gtf-file heb ik daarna verplaatst naar de map /students/2026-2027/Thema05/Groep3/subset. daarna ben ik zelf genavigeerd naar de map en heb ik het volgende commando gerund van STAR om een index te maken van het referentiebestand:
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeDir /star --genomeFastaFiles GCF_000146045.2_R64_genomic.fna --sjdbGTFfile genomic.gtf --sjdbOverhang 149
+```
+dit gaf de volgende foutmelding: "EXITING because of fatal OUTPUT FILE error: could not create output directory: /star for --genomeDir /star/
+ ERROR: Permission denied"
+ 
+wij hebben dit proberen op te lossen door het stuk "--genomeDir /star" uit het commando te halen, zoals hieronder te zien:
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles GCF_000146045.2_R64_genomic.fna --sjdbGTFfile genomic.gtf --sjdbOverhang 149
+```
+
+dit gaf ons de foutmelding: "EXITING because of INPUT ERROR: could not open genomeFastaFile: GCF_000146045.2_R64_genomic.fna". door te kijken naar de rechten van de bestanden werd het duidelijk dat die alleen voor mij (owner) op "rw" stonden. deze heb ik veranderd door middel van chmod 777. helaas gaf dit ons weer een foutmelding, namelijk: "EXITING because of INPUT ERROR: could not open genomeFastaFile: GCF_000146045.2_R64_genomic.fna" we hebben geprobeerd dit via de "normale" terminal te runnen in plaats van op die van rstudio. dit werkte op een of andere manier wel. wel gaf STAR het volgende aan:"!!!!! WARNING: --genomeSAindexNbases 14 is too large for the genome size=12157105, which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases 10
+". dus we hebben het commando opnieuw gerunt maar dan op de volgende manier:
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles GCF_000146045.2_R64_genomic.fna --sjdbGTFfile genomic.gtf --sjdbOverhang 149 --genomeSAindexNbases 10
+```
+
+het uitvoeren van dit commando lukte wel zonder foutmeldingen! hieruit hebben wij een geindexte versie van ons genoom.
+
+```{bash eval=FALSE}
+#gerunt op de map /students/2026-2027/Thema05/Groep3/subset
+#voor het wildtype
+STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts
+
+#voor de jy304 strain
+STAR --genomeDir GenomeDir --readFilesIn jy304_prestress.fastq --outFileNamePrefix jy304_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts
+```
+
+dit was succesvol. om daarna inzicht te krijgen op de gemapte bestanden die wij hebben hebben wij het volgende commando gerunt:
+```{bash eval=FALSE}
+samtools flagstat /students/2026-2027/Thema05/Groep3/subset/star/wildtype_prestress/wildtype_prestressAligned.sortedByCoord.out.bam
+```
+
+hieruit kwam het volgende:"
+114995 + 0 in total (QC-passed reads + QC-failed reads)
+87668 + 0 primary
+27327 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+114995 + 0 mapped (100.00% : N/A)
+87668 + 0 primary mapped (100.00% : N/A)
+0 + 0 paired in sequencing
+0 + 0 read1
+0 + 0 read2
+0 + 0 properly paired (N/A : N/A)
+0 + 0 with itself and mate mapped
+0 + 0 singletons (N/A : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+"
+dit betekend dat 100% van onze subset gemapt is aan het genoom.
+
+### resultaten
+
+### conclusie en vervolgstappen
+
+
 ## 
 
 ### doel van de dag
