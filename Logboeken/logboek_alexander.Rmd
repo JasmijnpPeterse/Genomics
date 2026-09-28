@@ -328,13 +328,107 @@ bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/subset/va
 bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/jy304_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/jy304_pileup
 ```
 
+--ploidy 1 zorgt er dus voor dat de variant calling haploid gedaan wordt
+
 ### resultaten
+
 wij hebben voor beide strains nu de read mapping gedaan, een pileupbestand gemaakt en de variant calling gedaan. de bestanden voor de read mapping zijn te vinden onder de map /students/2026-2027/Thema05/Groep3/subset/star . de pileupbestanden zijn te vinden onder de folder /students/2026-2027/Thema05/Groep3/subset/mpileup_output en de variant calling bestanden zijn te vinden onder de map /students/2026-2027/Thema05/Groep3/subset/variant_calls.
 
 ### conclusie en vervolgstappen
 
 vandaag was een succes. we hebben de stappen van onze pijplijn gedaan die wij moesten uitvoeren ook daadwerkelijk gedaan. wat wij nu nog moeten doen is nadenken hoe wij de daadwerkelijke analyse gaan doen. wij willen namelijk een subtraction analysis doen, waar wij dus de varianten van het wildtype van de varianten van de jy304 strain willen aftrekken om te kijken of wij de genen kunnen vinden die voor alcoholresistentie zorgen. er moet nog uitgezocht worden hoe dit gedaan moet worden.
 
+
+
+## 28/9/2026
+
+### doel van de dag
+
+vandaag willen wij proberen om subtraction analysis op de twee strains te doen.
+
+### motivatie van aanpak
+
+om te kunnen zien welke genen er anders zijn/helpen met de alcoholresistentie proberen wij te kijken naar de mutaties die wel in de jy304 strain zitten en niet in het wildtype zitten. vandaar de keuze van subtraction analysis
+
+### uitgevoerde werkzaamheden
+
+het eerste wat wij hebben gedaan is kijken naar mogelijke manieren/tools die wij kunnen gebruiken om de subtraction analysis mee uit te voeren. door deze zoektocht zijn wij tot de conclusie gekomen dat bcftools isec hiervoor te gebruiken is (verdere documentatie op https://samtools.github.io/bcftools/bcftools.html#isec). wij runnen dit commando als volgt:
+
+``` {bash eval=FALSE}
+# op weg naar de juiste directory
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+# het daadwerkelijke commando
+bcftools isec -p subtraction_analysis jy304_calls wildtype_calls
+```
+
+dit geeft de foutmelding "Failed to open jy304_calls: not compressed with bgzip". ik heb geprobeerd dit op te lossen door de namen van de bestanden te laten eindigen met .vcf. dit had geen effect. daarom proberen wij de bestanden te zippen met bgzip. dit heb ik gerund door het volgende commando:
+
+```{bash eval=FALSE}
+# voor de juiste directory
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+# het daadwerkelijke commando
+bgzip jy304_calls.vcf.gz
+bgzip wildtype_calls.vcf.gz
+```
+
+dit heeft onze bestanden veranderd naar .vcf.gz. het was de bedoeling om de originele bestanden ook nog te houden, wat helaas fout is gegaan. dit komt omdat wij niet de tweak -c hebben gebruikt.
+daarna hebben wij het volgende commando proberen te runnen:
+
+```{bash eval=FALSE}
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+bcftools isec -p subtraction_analysis jy304_calls.vcf.gz wildtype_calls.vcf.gz
+```
+dit gaf de volgende foutmelding:
+
+"Failed to open jy304_calls: not compressed with bgzip
+[E::hts_idx_load3] Could not load local index file 'jy304_calls.vcf.gz.csi' : Permission denied
+Failed to open jy304_calls.vcf.gz: could not load index"
+
+dit hebben wij opgelost door eerst een index te maken:
+
+```{bash eval=FALSE}
+# juiste directory
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+# het commando voor beide strains uitgevoerd
+bcftools index wildtype_calls.vcf.gz
+bcftools index jy304_calls.vcf.gz
+```
+
+hierdoor hebben wij de index bestanden gemaakt. hiermee zouden wij dus de bcftools isec moeten kunnen runnen. na het maken van de index hebben wij weer het bcftools isec commando gerunt:
+
+```{bash eval=FALSE}
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+bcftools isec -p substraction_analysis jy304_calls.vcf.gz wildtype_calls.vcf.gz
+```
+
+-p zorgt voor een nieuwe output directory waar onze data in gemaakt wordt. dit maakt de volgende bestanden in de folder /students/2026-2027/Thema05/Groep3/subset/variant_calls/substraction_analysis:
+
+0000.vcf: hierin staan de mutaties van jy304 die niet voorkomen in het wildtype.
+0001.vcf: hierin staan de mutaties van het wildtype die niet voorkomen in jy304.
+0002.vcf: hierin staan de mutaties van de jy304 strain die ook voorkomen in het wildtype.
+0003.vcf: hierin staan de mutaties van het wildtype die ook voorkomen in de jy304 strain.
+sites.txt: in dit bestand staan de "common sites" van beide bestanden.
+
+
+### resultaten
+
+de output van het isec commando is als volgt:
+0000.vcf: hierin staan de mutaties van jy304 die niet voorkomen in het wildtype.
+0001.vcf: hierin staan de mutaties van het wildtype die niet voorkomen in jy304.
+0002.vcf: hierin staan de mutaties van de jy304 strain die ook voorkomen in het wildtype.
+0003.vcf: hierin staan de mutaties van het wildtype die ook voorkomen in de jy304 strain.
+sites.txt: in dit bestand staan de "common sites" van beide bestanden.
+
+het verschil in de 0002 en 0003 bestanden is welk bestand het "moederbestand" is. de mutaties die in beide bestanden voorkomen zijn hetzelfde, maar de aantallen waarin ze voorkomen kan wel verschillen.
+
+### conclusie en vervolgstappen
+
+we hebben vandaag de subtraction analyse laten doen door een tool. echter moeten wij zelf nog kijken wat de output precies voor ons betekend, of en hoe hoog wij willen filteren en waar die mutaties zich daadwerkelijk bevinden. daarnaast is het goed om te kijken waarop wij willen filteren, kwaliteitsscore of diepte.
 
 
 ## 
