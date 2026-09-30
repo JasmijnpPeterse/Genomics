@@ -439,7 +439,7 @@ vandaag is het doel om de mutaties te plaatsen op de genen van een gistcel.
 
 ### motivatie van aanpak
 
-blijkbaar had oscar gisteren al de filtering gedaan op kwaliteit en depth, dus kunnen wij vandaag focussen om onze mutaties tegen de genen te plaatsen.
+blijkbaar had oscar gisteren al de filtering gedaan op kwaliteit en depth, dus kunnen wij vandaag focussen om onze mutaties tegen de genen te plaatsen. dit doen wij zodat wij de genen kunnen bekijken waar de mutaties hebben plaatsgevonden, en mogelijk kunnen bepalen of dit genen zijn die voor alcoholresistentie zorgen.
 
 ### uitgevoerde werkzaamheden
 
