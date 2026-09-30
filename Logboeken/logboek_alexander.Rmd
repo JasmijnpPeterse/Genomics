@@ -428,8 +428,106 @@ het verschil in de 0002 en 0003 bestanden is welk bestand het "moederbestand" is
 
 ### conclusie en vervolgstappen
 
-we hebben vandaag de subtraction analyse laten doen door een tool. echter moeten wij zelf nog kijken wat de output precies voor ons betekend, of en hoe hoog wij willen filteren en waar die mutaties zich daadwerkelijk bevinden. daarnaast is het goed om te kijken waarop wij willen filteren, kwaliteitsscore of diepte.
+we hebben vandaag de subtraction analyse laten doen door een tool. wij moeten nog kijken of en hoe hoog wij willen filteren en waar de mutaties zich daadwerkelijk bevinden. 
 
+
+## 30/09/2026
+
+### doel van de dag
+
+vandaag is het doel om de mutaties te plaatsen op de genen van een gistcel.
+
+### motivatie van aanpak
+
+blijkbaar had oscar gisteren al de filtering gedaan op kwaliteit en depth, dus kunnen wij vandaag focussen om onze mutaties tegen de genen te plaatsen.
+
+### uitgevoerde werkzaamheden
+
+eerst heb ik op ncbi gezocht naar de genen van de S288C giststrain (https://www.ncbi.nlm.nih.gov/datasets/gene/GCF_000146045.2/). hieruit blijkt dat deze strain toch wel bijna 6500 genen heeft. voor variant annotation moeten we dus een tool vinden of zelf een script schrijven. na even zoeken zijn wij achter het commando "bcftools csq" gekomen voo onze gene annotation. om deze tool te laten werken heb ik eerst het genoom van de S288C strain gedownload als "refseq only" en "annotated variants (.gff)". daarna hebben wij de tool gerunt als volgt:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+met hierin de de volgende tweaks
+-g: het "annotated variants" .gff bestand van de S288C strain. deze moet van de zelfde strain komen als het referentiegenoom
+-f: het referentiegenoom van de S288C strain
+-o: outputbestand, naam en directory
+
+dit gaf de foutmelding "Error: cannot write to ./variant_annotation/variant_annotation_jy304: No such file or directory". dit probeer ik op te lossen door deze directory te maken, maar dat lukte niet. daarom hebben we dit proberen op te lossen zonder de output in deze directory te zetten, als volgt:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+dit werkte, maar gaf tijdens het runnen ook het volgende: "Warning: 7185 warnings were suppressed, increase verbosity to see them all"
+daarom hebben wij het commando opnieuw proberen te runnen:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+-v zorgt hier voor de "verbosity", ofwel hoeveel de tool ons verteld en in welk detail. 2 is een hoger detail en 0 is dat de tool helemaal niks verteld.
+dit crashte, waarschijnlijk omdat de tool te veel wilde printen. daarom hebben wij het afgeschreven naar een bestand (warnings.log) op de volgende manier:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings.log ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+dit zorgde ervoor dat alle 7000+ waarschuwingen zijn afgeschreven naar het warnings.log bestand. bijna al deze waarschuwingen zagen er ongeveer zo uit: "Warning: Ignoring GFF feature with unknown phase .. NC_001133.9	RefSeq	exon	1807	2169	.	-	.	ID=exon-NM_001180043.1-1;Parent=rna-NM_001180043.1;Dbxref=GeneID:851229,GenBank:NM_001180043.1;end_range=2169,.;gbkey=mRNA;gene=PAU8;locus_tag=YAL068C;partial=true;product=seripauperin PAU8;start_range=.,1807;transcript_id=NM_001180043.1". dit lijkt er op dat de tool de lijnen van het gff bestand ziet als fouten.
+zelf hebben wij niet de oplossing hiervoor gevonden, maar na een korte bespreking met Ronald zijn wij tot de conclusie dat wij het referentiegenoom (en de .gff) van ensemble zelf moeten downloaden/maken voor deze stap. de versie van het referentiegenoom op ensemble is een GCA, de versie van het referentiegenoom op ncbi is een GCF. Daarom maken wij de keuze om het referentiegenoom van ncbi zelf om te zetten, aangezien GCF-versies vaak zijn gecontroleerd door ncbi en GCA- versies niet gecontroleerd zijn. 
+voor het omzetten van onze willen wij de tool gff2gff van bcftools gebruiken. deze in de terminal runnen lukte alleen niet, omdat de tool niet gevonden kon worden. na nog een consult met Ronald hebben wij de folder voor gff2gff in onze path moeten zetten. dit heb ik gedaan door het volgende te runnen:
+
+```{bash eval=FALSE}
+nano ~/.bashrc
+```
+
+dit opent de text editor. hierin moet er de volgende lijn geplakt worden: "export PATH="/homes/ajltfluttert/binfo/toolbox/bcftools-1.23/misc:$PATH" ". hierdoor krijgt de terminal ook te zien waar het commando gff2gff staat. daarna hebben wij het commando gerunt op de volgende manier:
+
+```{bash eval=FALSE}
+# veranderen naar locatie
+cd /students/2026-2027/Thema05/Groep3/subset
+
+gff2gff genomic.gff > genomic.csq.gff
+```
+
+dit geeft de volgende foutmelding: "/tmp/RtmpeNeCti/chunk-code-2c787071c61507.txt: line 4: genomic.csq.gff: Permission denied"
+dit zou aan moeten geven dat de permissies die wij hebben niet voldoende zijn, maar de file subset staat volledig open voor iedereen in principe (rwxrwxrwx). daar ligt het dus niet aan. na op te zoeken wat er fout gegaan kan zijn hebben wij de tool nog een keer proberen te runnen
+
+```{bash eval=FALSE}
+gff2gff < /students/2026-2027/Thema05/Groep3/subset/genomic.gff > /students/2026-2027/Thema05/Groep3/subset/genomic.csq.gff
+
+```
+
+deze run werkte succesvol. hieruit hebben wij de goed geformatte versie van onze annotation file gekregen. Oscar heeft deze nog een keer proberen te runnen met "bcftools csq", maar in plaats van 7000+ waarschuwingen hebben we nu 13000+ waarschuwingen gekregen. 
+
+### resultaten
+
+we hebben een "beter" geformatte versie van onze annotation file gekregen.
+
+### conclusie en vervolgstappen
+
+de daadwerkelijke annotatie moet nog een keer gebeuren. volgende keer gaan wij onderzoeken of de GCA versie van het referentiegenoom op ensemble minder waarschuwingen geeft en hopelijk hebben wij dan een geannoteerde versie van ons genoom.
 
 ## 
 
