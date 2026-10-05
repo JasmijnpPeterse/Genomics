@@ -529,6 +529,73 @@ we hebben een "beter" geformatte versie van onze annotation file gekregen.
 
 de daadwerkelijke annotatie moet nog een keer gebeuren. volgende keer gaan wij onderzoeken of de GCA versie van het referentiegenoom op ensemble minder waarschuwingen geeft en hopelijk hebben wij dan een geannoteerde versie van ons genoom.
 
+## 2/10/2026
+
+### doel van de dag
+
+het doel van vandaag is om het GCA-referentiegenoom te downloaden en onze pijplijn daar op te runnen.
+
+### motivatie van aanpak
+
+omdat wij bij de variant annotation van vorige keer enorm veel foutmeldingen kregen, willen wij proberen of het met de gca-versie van het referentiegenoom beter werkt. het nadeel is wel dat hier dus niet naar gekeken is door professionals van ncbi.`
+
+### uitgevoerde werkzaamheden
+
+eerst heb ik vandaag het GCA-referentiegenoom gedownload van ensembl. dit heb ik gedaan op https://www.ebi.ac.uk/ena/browser/view/GCA_000146045.2 en https://ftp.ebi.ac.uk/pub/ensemblorganisms/GCA/000/146/045/2/community/2018_10/geneset/ . bij die eerste link heb ik het bestand GCA_000146045.2.fasta.gz van het referentiegenoom gedownload. bij de tweede link heb ik de bestanden genes.gff3.gz, genes.embl.gz en genes.gtf.gz gedownload. deze heb ik hierna verplaatst naar de map /students/2026-2027/Thema05/Groep3/subset/retry_gca verplaatst. ik heb hier ook een kopie van onze in het begin gemaakte subset in gezet, zodat we de pijplijn helemaal opnieuw kunnen doen met het GCA-referentiegenoom. hier ben ik weer begonnen met mappen met star: 
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta.gz --sjdbGTFfile /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf.gz --sjdbOverhang 149 --genomeSAindexNbases 10
+```
+
+dit gaf de volgende foutmelding "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta.gz is not fasta: the first character is '' (31), not '>'.
+ Solution: check formatting of the fasta file. Make sure the file is uncompressed (unzipped)."
+ eerst moet ik dus ervoor zorgen dat de bestanden unzipped worden. dit probeer ik met het commando unzip:
+ 
+```{bash eval=FALSE}
+#voor het referentiegenoom
+gunzip /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta.gz
+
+#voor het genes.gff3 bestand
+gunzip /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gff3.gz
+
+#voor het genes.gtf bestand
+gunzip /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf.gz
+```
+
+dit heeft zonder problemen gerund. hieruit heb ik de bestande GCA_000146045.2.fasta, genes.gff3 en genes.gtf gekregen. hiermee heb ik het STAR commando opnieuw proberen te runnen, maar dan met niet gezipte bestanden:
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta --sjdbGTFfile /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf --sjdbOverhang 149 --genomeSAindexNbases 10
+```
+
+dit gaf de foutmelding: "Fatal INPUT FILE error, no valid exon lines in the GTF file: /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf
+Solution: check the formatting of the GTF file. One likely cause is the difference in chromosome naming between GTF and FASTA file.". 
+gebaseerd hierop heb ik de bestanden bekeken en vooral gelet op het format hiervan. wat hier opvalt is dat de genes.gtf van ensembl begint met "IV	sgd", wat waarschijnlijk slaat op dat het data is uit chromosoom 4. ik heb gekeken naar de oplossing hiervoor. een van de dingen die aangeraden wordt is om te controleren of mijn chromosomen wel dezelfde numering hebben in beide bestanden. na dit te controleren kom ik tot de conclusie dat ze beide gebruik maken van romeinse cijfers. dit zou dus in principe niet het probleem moeten zijn. na verder zoeken heb ik ook dingen gevonden zoals "zorg dat beide bestanden van dezelfde plek komen", maar wij hebben ze allebei van ensembl, dus dit zou ook niet fout moeten gaan. helaas moet ik het voor vandaag hierbij opgeven.
+
+### resultaten
+
+er zijn helaas geen resultaten vandaag. de foutmeldingen waar ik tegenaan ben gelopen heb ik helaas niet op kunnen lossen. 
+
+### conclusie en vervolgstappen
+
+we moeten nog steeds onze pijplijn opnieuw proberen te runnen met het GCA-genoom, zodat wij kunnen vinden of dit even veel foutmeldingen geeft. verder moeten wij nog kijken wat wij met onze uiteindelijke gene annotation kunnen doen.
+
+
+## 5/10/2025
+
+### doel van de dag
+
+vandaag willen we 
+
+### motivatie van aanpak
+
+### uitgevoerde werkzaamheden
+
+### resultaten
+
+### conclusie en vervolgstappen
+
+
 ## 
 
 ### doel van de dag
