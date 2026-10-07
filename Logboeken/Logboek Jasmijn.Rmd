@@ -12,75 +12,413 @@ date: "2026-09-15"
 ### Conclusie
 ### Volgende stap
 
-# Logboek Jasmijn
-## 13/09/2026 
-### Doel: 
-Samenvatten van ons gekozen artikel over hoe gist reageert op ethanol stress.
-(https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528) 
-### Motivatie: 
+---
+## 13/09/2026
+### Doel van de dag
+Het maken van een duidelijke en inhoudelijke samenvatting van het gekozen artikel over ethanolstress in gist (https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528) 
+
+
+### Motivatie
 Dinsdag is de presentatie dus ik maak het liever vandaag al zodat ik het niet last minute hoef te doen, en zodat ik minder stress heb
-### Uitgevoerde werkzaamheden: 
-De samenvatting
-### Resultaten 
-Mijn samenvatting (https://docs.google.com/document/d/1k2wYKrGZMdxGFDWmonYJuurFLbNxj8qxIpaRrhwoJ_w/edit?usp=sharing)
+
+### Uitgevoerde werkzaamheden
+Ik heb het volledige artikel gelezen en een uitgebreide samenvatting geschreven. Deze staat in Google Docs zodat mijn groepsleden deze kunnen bekijken.
+
+### Resultaten
+De samenvatting is af en staat hier:  
+https://docs.google.com/document/d/1k2wYKrGZMdxGFDWmonYJuurFLbNxj8qxIpaRrhwoJ_w/edit?usp=sharing
+
 ### Conclusie
-Duurde even, maar was een erg interresant artikel om te lezen
-### Volgende stap: 
-Het presenteren van de samenvatting
+Het artikel was interessant en leerzaam. Het kostte wat tijd om alle details te begrijpen, maar het gaf een goed beeld van gistreacties op ethanolstress.
+
+### Volgende stap
+De samenvatting presenteren tijdens de plan‑van‑aanpak presentatie.
+
+---
 
 ## 14/09/2026
 ### Doel
-Ik begon de dag zonder doel maar tijdens de dag was het om de data te downloaden
+Aan het begin van de dag had ik nog geen concreet doel, maar tijdens de les werd duidelijk dat we onze RNA‑seq data moesten downloaden.
+
 ### Motivatie
-Ik ben op school dus ik wil er niet voor niets zitten
+Ik wil mijn tijd op school nuttig besteden en het downloaden van de data is een noodzakelijke stap voor de pijplijn.
+
 ### Uitgevorede werkzaamheden
-Ik heb voor de presentatie mijn samenvatting een beetje aangepast waardoor het iets soepeler te vertellen is. Ook heb ik een code geschreven om onze data te downloaden
+Ik heb voor de presentatie mijn samenvatting een beetje aangepast waardoor het iets soepeler te vertellen is. Ook heb ik een code geschreven om onze data te downloaden via SRATools
 ```{bash SRA_download, eval=FALSE}
 prefetch $(</homes/jrjpeterse/Genomics/SRR_Acc_List.txt) --output-directory \
 /students/2026-2027/Thema05/Groep3/SRA
 ```
 
+Daarna heb ik de sra bestanden omgezet naar fastq bestanden
+
 ```{bash extract_fastq, eval=FALSE}
 find /students/2026-2027/Thema05/Groep3/SRA -name "*.sra" | \
 parallel 'fasterq-dump -O /students/2026-2027/Thema05/Groep3/fastq/ {}'
 ```
+
 ### Resultaten
-Het downloaden is gelukt, en staat netjes in de map. 
+Het downloaden is gelukt, en staat netjes in de map: /students/2026-2027/Thema05/Groep3/fastq onder de namen 
+SRR11923104.fastq  SRR11923107.fastq  SRR11923111.fastq  SRR11923114.fastq  SRR11923117.fastq  
+SRR11923105.fastq  SRR11923108.fastq  SRR11923112.fastq  SRR11923115.fastq  SRR11923118.fastq  
+SRR11923106.fastq  SRR11923109.fastq  SRR11923113.fastq  SRR11923116.fastq  SRR11923119.fastq 
+
 ### Conclusie
-Nu dat onze data is gedownload kunnen we verder met ons project.
+De data is succesvol gedownload en staat klaar voor verdere verwerking.
+
 ### Volgende stap
 De presentatie morgen geven en bedenken hoe we de code willen schrijven.
 
+---
+
 ## 15/09/2026
+
 ### Doel
 Een nette presentatie geven
+
 ### Motivatie
 Ik wil het jaar goed beginnen.
+
 ### Uitgevorede werkzaamheden
 We hebben de presentatie gegeven
+
 ### Resultaten
 De presentatie ging prima, had wel beter gekund.Ik vergat mijn hele samenvatting waardoor ik moeite had met het presenteren. De feedback hebben we nog niet binnen.
+
 ### Conclusie
 Ik had beter mijn samenvatting moeten leren, zodat dit niet had kunnen gebeuren
+
 ### Volgende stap
 De volgende les gaat we het genoom van de gist downloaden en een begin maken in het progameren.
 
+---
+
 ## 16/09/2026
 ### Doel
+Subset maken
+
 ### Motivatie
+Zodat we door kunnen met de quality control
+
 ### Uitgevorede werkzaamheden
+Uiteindelijk hebben we niet aan het project kunnen werken, dit was omdat we uitleg kregen over de statestiek achter R
+
+### Resultaten
+Geen resultaten vandaag
+
+### Conclusie
+We hadden dit gisteren al moeten doen
+
+### Volgende stap
+De subset maken en daar de quality control
+
+---
+
+## 21/09/2026
+### Doel
+De subset af hebben en hopelijk de quality control ook.
+
+### Motivatie
+Ik hoop dat we dit snel af hebben zodat we door kunnen met de opdrachten bij week 3.
+
+### Uitgevorede werkzaamheden
+Toen we begonnen met het uitvogelen hoe we de subset moesten maken kwamen we er achter dat er iets was mis gegaan tijdens het downloaden van de data. Op de website had ik de pre stress variant van jy304 en de wild-type aangeklikt en op accesionlist downloaden geklikt. Nu blijkt het dat ik nog moets klikken op gesecteerd. Hierdoor heb ik per ongeluk alle data sets gedownload en niet alleen de pre stress. Toen ik dit wist, heb ik alle fastq bestanden behalve de pre stress(SRR11923111.fastq en SRR11923116.fastq). Oscar heeft de assecionlist geupdate zodat deze ook klopt.
+
+Nu hebben we dus alleen nog de twee fastq bestanden over en hier gaan we een subset van maken. Op dit punt maak ik een andere
+map genaamd subset om de subset in te zetten, genaamd 'subset'. De subset hebben we gemaakt door middel van seqtk:
+```{bash, eval=FALSE} 
+verwijderd.jrjpeterse@assemblix2019:/students/2026-2027/Thema05/Groep3/fastq$ seqtk sample -s 696769 SRR11923111.fastq
+100000 > wildtype_prestress.fastq'
+
+verwijderd.jrjpeterse@assemblix2019:/students/2026-2027/Thema05/Groep3/fastq$ seqtk sample -s 696769 SRR11923116.fastq
+100000 > Jy304_prestress.fastq
+```
+
+Nu dat de subsets zijn gemaakt kunnen we de quality control doen, dit gaan we doen via de terminal met fastQC. 
+```{bash, eval=FALSE} 
+
+```
+
+Tijdens het uitvoeren van deze data kregen we een java foutmelding, maar dit bleek niet relevant te zijn voor de data, het was een fout van de terminal.
+
+Uit de quality controle zijn een aantal waarschuwingen gekomen. 
+
+1. Per base sequence quality. Deze gaf een waarschuwing als een kwart van je data lager is dan 10 of het median voor de base lager is dan 25.
+
+2. Per base sequence content: Dit betekent dat er een verschil tussen A, T, C, G groter is dan 10% in een positie. Deze waarschuwing kregen wij doordat het gemaakt is met RNA-seq data is waar primers nog in staan.
+
+3. overrepresented sequences: Dit gebeurd als er één of meerdere sequenties zijn die meer dan 0.1% is van alle totale sequenties. Dit komt doordat wij een kleinen RNA-library hebben hierdoor komen van naturen in het gist data-set vaak dezelfde sequenties voor.
+
+### Resultaten
+### Conclusie
+### Volgende s]
+---
+title: "Logboek Jasmijn"
+output: html_document
+date: "2026-09-15"
+---
+
+# Logboek Jasmijn
+
+
+---
+
+## 14/09/2026
+### Doel van de dag
+Aan het begin van de dag had ik nog geen concreet doel, maar tijdens de les werd duidelijk dat we onze RNA‑seq data moesten downloaden.
+
+### Motivatie
+Ik wil mijn tijd op school nuttig besteden en het downloaden van de data is een noodzakelijke stap voor de pijplijn.
+
+### Uitgevoerde werkzaamheden
+Ik heb mijn samenvatting licht aangepast voor de presentatie.  
+Daarna heb ik de SRA‑bestanden gedownload via SRAtools:
+
+```{bash}
+prefetch $(</homes/jrjpeterse/Genomics/SRR_Acc_List.txt) --output-directory \
+/students/2026-2027/Thema05/Groep3/SRA
+```
+
+Daarna heb ik de .sra‑bestanden omgezet naar fastq:
+
+```{bash}
+find /students/2026-2027/Thema05/Groep3/SRA -name "*.sra" | \
+parallel 'fasterq-dump -O /students/2026-2027/Thema05/Groep3/fastq/ {}'
+```
+
+### Resultaten
+Alle fastq‑bestanden zijn succesvol gedownload en staan in:  
+`/students/2026-2027/Thema05/Groep3/fastq`
+
+### Conclusie
+De data is succesvol gedownload en staat klaar voor verdere verwerking.
+
+### Volgende stap
+De presentatie geven en nadenken over hoe we de code voor de pijplijn gaan schrijven.
+
+
+---
+
+## 16/09/2026
+### Doel
+Subset maken
+
+### Motivatie
+Zodat we door kunnen met de quality control
+
+### Uitgevorede werkzaamheden
+Uiteindelijk hebben we niet aan het project kunnen werken, dit was omdat we uitleg kregen over de statistiek achter R.
+
+### Resultaten
+Geen resultaten vandaag
+
+### Conclusie
+We hadden dit gisteren al moeten doen.
+
+### Volgende stap
+De subset maken en daarna de quality control.
+
+
+---
+
+## 21/09/2026
+### Doel
+De subset af hebben en hopelijk de quality control ook.
+
+### Motivatie
+Ik hoop dat we dit snel af hebben zodat we door kunnen met de opdrachten bij week 3.
+
+### Uitgevorede werkzaamheden
+Tijdens het maken van de subset kwamen we erachter dat er iets mis was gegaan bij het downloaden van de data.  
+Ik had de pre‑stress varianten geselecteerd, maar niet op “selected” geklikt, waardoor alle datasets waren gedownload.
+
+We hebben alle fastq‑bestanden verwijderd behalve de pre‑stress bestanden:  
+- SRR11923111.fastq  
+- SRR11923116.fastq  
+
+Oscar heeft de accession list gecorrigeerd.
+
+Daarna hebben we subsets gemaakt met seqtk:
+
+```{bash}
+seqtk sample -s 696769 SRR11923111.fastq 100000 > wildtype_prestress.fastq
+seqtk sample -s 696769 SRR11923116.fastq 100000 > jy304_prestress.fastq
+```
+
+Daarna hebben we FastQC uitgevoerd. Tijdens het runnen kregen we een Java‑foutmelding, maar dit bleek niet relevant.
+
+Uit de QC kwamen drie waarschuwingen:
+
+1. **Per base sequence quality**  
+   Een kwart van de data heeft een kwaliteit <10 of de median <25.
+
+2. **Per base sequence content**  
+   >10% verschil tussen A/T of C/G op bepaalde posities, waarschijnlijk door hexamer‑bias in RNA‑seq.
+
+3. **Overrepresented sequences**  
+   >0.1% van alle reads is identiek, typisch voor kleine RNA‑libraries.
+
+### Resultaten
+De subsets zijn gemaakt en de QC is uitgevoerd.
+
+### Conclusie
+De data bevat enkele waarschuwingen, maar is bruikbaar voor verdere analyse.
+
+### Volgende stap
+Mapping uitvoeren met STAR en daarna variant calling.
+
+
+---
+
+## 28/09/2026
+### Doel van de dag
+Het uitvoeren van een subtraction analysis op de variant calling resultaten van de wildtype gist en de JY304‑strain.
+
+### Motivatie
+Onze onderzoeksvraag richt zich op het vinden van genen die mogelijk bijdragen aan ethanolresistentie. Door varianten te vergelijken kunnen we mutaties identificeren die uniek zijn voor JY304.
+
+### Uitgevoerde werkzaamheden
+We hebben bcftools isec gebruikt om de varianten te vergelijken.  
+Eerst moesten de VCF‑bestanden ge‑bgzip’t worden:
+
+```{bash}
+bgzip jy304_calls.vcf
+bgzip wildtype_calls.vcf
+```
+
+Daarna hebben we indexbestanden gemaakt:
+
+```{bash}
+bcftools index jy304_calls.vcf.gz
+bcftools index wildtype_calls.vcf.gz
+```
+
+Daarna werkte het subtraction‑commando:
+
+```{bash}
+bcftools isec -p subtraction_analysis jy304_calls.vcf.gz wildtype_calls.vcf.gz
+```
+
+Dit genereerde:
+
+- **0000.vcf** — mutaties uniek voor JY304  
+- **0001.vcf** — mutaties uniek voor wildtype  
+- **0002.vcf** — gedeelde mutaties (JY304 als referentie)  
+- **0003.vcf** — gedeelde mutaties (wildtype als referentie)  
+- **sites.txt** — gedeelde posities
+
+### Resultaten
+We hebben nu een volledige subtractie van de varianten tussen beide stammen. De bestanden geven precies welke mutaties uniek zijn voor JY304.
+
+### Conclusie
+De subtraction analysis is succesvol uitgevoerd. Dit vormt de basis voor het koppelen van mutaties aan genen.
+
+### Volgende stap
+De mutaties koppelen aan genen via het S288C‑genoom en de annotaties.
+
+---
+## 05/10/2026
+### Doel
+Beginnen met het toepassen van alle stappen op de complete dataset
+### Motivatie
+Ik wil dat het voornamelijkste hiervan al is gedaan voordat de vakantie begint
+### Uitgevorede werkzaamheden
+Ik begon vandaag met een taak waarbij ik moest kijken ofdat er minder warnings konden worden gegeven als ik een command run tijdens de bcftools die zegt dat phase moet worden genegeerd. Nu zijn er 7190 warnings, waarvan zeker 6852
+```{bash}
+bcftools csq  --phase m -g ./0000.vcf -o ./variant_
+annota0tion/variant_annotation_jy304
+
+About: Haplotype-aware consequence caller.
+Usage: bcftools csq [OPTIONS] in.vcf
+```
+vcf file
+
+```{bash}
+bcftools csq  --phase m -g genomic.gff -f ./variant_annotation/variant_annotation_jy304
+About: Haplotype-aware consequence caller.
+Usage: bcftools csq [OPTIONS] in.vcf
+```
+Nogsteeds een vcf file
+
+
+```{bash} 
+ bcftools csq --phase m -f ../GCF_000146045.2_R64_genomic.fna -g ../genomic.gff -o variant_annotation/variant_annotation_jy304.vcf 0000.vcf.gz
+[E::hts_open_format] Failed to open file "0000.vcf.gz" : No such file or directory
+Failed to read from 0000.vcf.gz: No such file or directory
+```
+In de verkeerde directory
+
+```{bash}
+bcftools csq --phase m -f ../GCF_000146045.2_R64_genomic.fna -g ../genomic.gff -o variant_annotation/variant_annotation_jy304.vcf 0000.vcf
+```
+-g en -f moesten worden omgedraaid
+
+```{bash}
+bcftools csq --phase m -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
+```
+-m doet: merge all GTs into a single haplotype (0/1 → 1, 1/2 → 1)
+Dit gaf geen verbeterd resultaat
+6852
+
+```{bash}
+bcftools csq --phase a -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
+```
+
+```{bash}
+bcftools csq --phase s -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
+```
+
+---
+
+```{bash}
+fastqc /students/2026-2027/Thema05/Groep3/fastq/SRR11923111.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+```
+
+```{bash}
+fastqc /students/2026-2027/Thema05/Groep3/fastq/SRR11923116.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+```
+
+Adaprors nog in de data dus wij moeten nog trimmomatic gaan uitvoeren.
+### Resultaten
+
+### Conclusie
+### Volgende stap
+
+## ../../..
+### Doel
+De trimmomatic uitvoeren op de complete dataset en dan verder met star
+### Motivatie
+Ik hoop dat ik zoveel mogelijk af heb zodat ik niet in de vakantie hoef te werken.
+### Uitgevorede werkzaamheden
+
+Gisteren hebben Oscar en Alexander uitgevonden dat 
+```{bash}
+TrimmomaticSE -threads 4 fastq/SRR11923116.fastq Genomics/jy304_prestress_trimmed.fastq ILLUMINACLIP:/usr/share/trimmomatic/TruSeq3-SE.fa:2:30:10
+
+TrimmomaticSE -threads 4 fastq/SRR11923111.fastq Genomics/wildtype_prestress_trimmed.fastq ILLUMINACLIP:/usr/share/trimmomatic/TruSeq3-SE.fa:2:30:10
+
+```
+
+
+```{bash}
+mv jy304_prestress_trimmed.fastq trimmed_data/
+mv wildtype_prestress_trimmed.fastq trimmed_data/
+```
+
+
+```{bash}
+fastqc trimmed_data/jy304_prestress_trimmed.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+
+fastqc trimmed_data/wildtype_prestress_trimmed.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+
+```
+geen a
+
+
 ### Resultaten
 ### Conclusie
 ### Volgende stap
 
-## 21/09/2026
-### Doel
-### Motivatie
-### Uitgevorede werkzaamheden
-Achter gekomen sample assecion list verkeerd gedownload
-alle behalve ..11 en ...16 verwijderen
-jrjpeterse@assemblix2019:/students/2026-2027/Thema05/Groep3/fastq$ seqtk sample -s 696769 SRR11923116.fastq 100000 > Jy304_prestress.fastq
-### Resultaten
-### Conclusie
-### Volgende stap
+
+
 
