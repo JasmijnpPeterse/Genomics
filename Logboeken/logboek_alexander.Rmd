@@ -8,15 +8,30 @@ output: html_notebook
 
 ## Introductie
 
+Voor dit onderzoek gaan Jasmijn, Oscar en ik de data van een experiment onderzoeken (te vinden op https://doi.org/10.1371/journal.pone.0239528). in het originele experiment hebben de onderzoekers vooral transcriptomics gedaan. daarin hebben zij een wildtype strain aan bakkersgist (S. Cerevisiae) zitten kweken die beter resistent zou moeten zijn tegen alcohol. dit hebben zij gedaan door het wildtype bloot te stellen aan alcohol in een oplossing van 24.5%. daarmee hebben zij de meeste gistcellen gedood, maar de cellen die levend zijn gebleven hebben zij doorgekweekt en dit proces 10 tot 12 x mee herhaald, totdat een overleving van ongeveer 35% vergeleken met de ouderlijke stam was behaald onder de gistcellen.
+wij gaan gebaseerd op dit onderzoek een genomics onderzoek starten. wij willen namelijk kijken of wij kunnen controleren of de mutaties daadwerkelijk op de genen die invloed hebben op alcoholresistentie hebben plaatsgevonden. dit gaan wij doen met behulp van trimming, mapping, variant calling en gene annotation. 
 
 ## Data
-De data die wij gebruiken is een deel van de data van het volgende artikel: https://doi.org/10.1371/journal.pone.0239528 of de link direct naar de data: https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa . uit deze data hebben wij voor ons experiment gekozen uit de pre-stress RNA-seq data van beide stammen (wildtype en JY304). dit zijn samples SRR11923111 (wildtype) en SRR11923116 (JY304).
+
+De data die wij gebruiken is een deel van de data van het volgende artikel: https://doi.org/10.1371/journal.pone.0239528 of de link direct naar de data: https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa . uit deze data hebben wij voor ons experiment gekozen uit de pre-stress RNA-seq data van beide stammen (wildtype en JY304). dit zijn samples SRR11923111 (wildtype) en SRR11923116 (JY304). het referentiegenoom dat wij hebben gebruikt is het S288C referentiegenoom van bakkersgist (S. Cerevisiae, te vinden op https://www.ncbi.nlm.nih.gov/datasets/taxonomy/559292/).
+om deze data te onderzoeken hebben wij gebruik gemaakt van de volgende tools:
+- fastQC v0.12.1
+- TrimmomaticSE v0.39
+- STAR v2.7.11b
+- BCFtools v1.21*
+- bgzip v1.18
+
+* BCFtools v1.21 is gebruikt op de volledige dataset, op de subset is BCFtools v1.23 gebruikt.
 
 ## 6/9/2026
 
 ### doel van de dag
+
 een artikel vinden om ons onderzoek op te bouwen
+
 ### motivatie van aanpak
+
+wij moeten een experiment uitzoeken om na te bootsen voor genomics
 
 ### uitgevoerde werkzaamheden
 vandaag hebben wij gekeken naar onderzoeken die ons interessant lijken. Er is op ncbi gezocht naar de zoekterm: 'Genome variation profiling by high throughput sequencing'. daaruit is het artikel dat bij resultaten beschreven staat gekomen voor genomics. verder hebben wij dat artikel doorgenomen.
@@ -585,25 +600,122 @@ we moeten nog steeds onze pijplijn opnieuw proberen te runnen met het GCA-genoom
 
 ### doel van de dag
 
-vandaag willen we 
+vandaag willen we de gene annotation gaan runnen en kijken wat de verschillende manieren van phasing doen. verder willen wij kijken naar welke genen er betrokken zijn bij de ethanolresistentie en bepalen wat wij met onze uitendelijke output van bcftools csq willen doen.
 
 ### motivatie van aanpak
 
+de gene annotation stap van onze pijplijn proberen we nu met verschillende manieren van --phase te runnen, om hiermee proberen goede output te krijgen met zo min mogelijk foutmeldingen. daarnaast moeten wij voor onze eindstap de genen waar onze mutaties zitten kunnen vergelijken met de genen waar iets van alcoholresistentie in gebeurd vergelijken. 
+
 ### uitgevoerde werkzaamheden
+
+eerst hebben we vandaag als eerste een taakverdeling gedaan. jasmijn zou bcftools csq opnieuw runnen met andere --phase tweaks en ik en oscar zouden op zoek gaan naar de genen in gist die verantwoordelijk zijn voor alcoholresistentie in gist en of wij alvast een manier van analyse zouden kunnen bedenken voor onze einddata. voor de data van de genen hebben we eerst in het originele onderzoek gekeken. hierin staat dat zij origineel 900 genen hadden gevonden die effect hadden op alcoholresistentie. helaas hadden ze in hun experiment maar een set van de 20 beste genen voor alcoholresistentie en de 20 slechtste genen voor alcoholresistentie gepubliceerd. in overleg met de docent hebben wij ervoor gekozen dat wij dit gaan gebruiken om onze mutaties mee te vergelijken. deze lijst hebben we gedownload en gezet in het mapje /students/2026-2027/Thema05/Groep3/subset/alcoholresistentiegenen.
+
+jasmijn had wat hulp nodig met uitzoeken welke tweaks voor --phase gebruikt moesten worden bij bcftools csq. ik heb haar geholpen met het uitzoeken van deze tweaks. de runs hiervan hebben in het warnings.log bestand niks veranderd en de output van bcftools csq heeft zover wij zien geen data verloren bij het runnen ban bcftools csq. voor verdere details, kijk het logboek van jasmijn. 
+
+tijdens het runnen van de pijplijn is jasmijn er achter gekomen dat wij heel veel adapters nog hebben. dit betekend dat wij eerst ook nog een keer op de subset trimmomatic uit moeten proberen. door middel van het volgende commando hebben wij gevonden dat trimmomatic op het systeem staat:
+
+```{bash eval=FALSE}
+apropos trimmomatic
+```
+
+hieruit kwamen de tools TrimmomaticSE en TrimmomaticPE, voor Single ends en paired ends. wij hebben Single ends en gebruiken dus ook trimmomaticSE voor ons project. 
+
+vandaag was een hectische werkdag, waarin ik constant van de hak op de tak moest springen tussen eigen werkzaamheden en andermans werkzaamheden, waardoor ik niet gefocust op een ding kon werken. ik heb vooral jasmijn geholpen met het uitzoeken van dingen, dus voor verder inzicht naar werkzaamheden refereer ik naar haar logboek. 
 
 ### resultaten
 
+we zijn erachter gekomen dat wij nog trimmomatic moeten runnen op onze data en dat wij de output van bcftools csq wel gewoon kunnen vertrouwen
+
 ### conclusie en vervolgstappen
 
+wij moeten de pijplijn runnen op de volledige data, maar dan incl trimmomatic.
+
+
+## 7/10/2026  
+
+### doel van de dag
+
+mijn doel van vandaag is om op de geannoteerde data een script te schrijven die de genen vergelijkt met de genen die invloed hebben op alcoholresistentie die de onderzoekers van ons uitgekozen experiment hebben gevonden.
+
+### motivatie van aanpak
+
+in princiepe is dit de laatste stap die bij onze subset nog gedaan moet worden om er zichtbaar resultaat uit te krijgen.
+
+### uitgevoerde werkzaamheden
+
+```{r eval=FALSE}
+library(dplyr)
+
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+jy304_info <- strsplit(jy304$info, ";")
+
+jy304_info_rbind <- do.call(rbind, jy304_info)
+
+head(jy304_info_rbind)
+
+jy304_df <- as.data.frame(jy304_info_rbind)
+
+filtered_jy304 <- select(jy304_df, starts_with("BCSQ="))
+
+filtered_jy304
+```
+
+de code hierboven heb ik vandaag geschreven. helaas heeft onze data een probleem, namelijk dat de lijnen waarin staat op welk gen de mutatie zit op verschillende lijnen in de dataframe/lijst staat. dit zorgt ervoor dat wij eerst moeten filteren op de lijnen die beginnen met "BCSQ" en daarna nog verder kunnen filteren. ik heb vandaag geprobeerd dat te doen, maar dat is mij niet meer gelukt. het schrijven van de code vandaag ging wat stroef.
+
+### resultaten
+
+een beginsel van een r script om de data mee te verwerken
+
+### conclusie en vervolgstappen
+
+het script moet nog afgeschreven worden om een analyse te doen. de eerste stap hierin is alle nuttige data in een dataframe/ op een lijn in een dataframe krijgen.
 
 ## 
 
 ### doel van de dag
 
+verder werken met het script voor de analyse 
+
 ### motivatie van aanpak
+
+dit is de laatste slag die we moeten slaan op de subset om onze volledige analyse af te maken.
 
 ### uitgevoerde werkzaamheden
 
+vandaag ben ik verder gegaan met de code van vorige keer.
+
+```{r eval=FALSE}
+library(dplyr)
+
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+jy304_info <- strsplit(jy304$info, ";")
+
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+jy304_bcsq_split
+```
+
+in plaats van rbind gebruiken ben ik gaan zoeken naar hoe je elementen filtert op waarmee de elementen zelf beginnen. aangezien wij wel een tabel hebben kunnen wij met sapply iets laten doen over alle elementen in de tabel. hierdoor heb ik bij alle lijnen het deel gekregen waar het type mutatie en het gen in zit. eerst hebben wij strsplit geprobeerd, waar alle letters door gesplitst werden. daarna heb ik geprobeerd de lijnen te splitsen met de "split" functie, maar deze gaf ook geen goed resultaat. daarna heb ik in de documentatie van split en strsplit gekeken om daar uit te halen wat er mis gaat. daar heb ik gevonden dat ik strsplit moest runnen met fixed=T. hierdoor is de data goed gesplit op onderdeel. wel zijn er nog NA's aanwezig in de data, waarschijnlijk omdat niet alle varianten goed zijn gegaan bij gene annotation.
+
+verder heb ik vandaag de introductie gemaakt van het logboek en heb ik alle gebruikte tools met versies bij data in het logboek gezet.
+
 ### resultaten
 
+de resultaten van vandaag zijn het R-script zoals te zien bij de werkzaamheden van vandaag en de output die dit script geeft, namelijk een gestplitste tabel met daarin de data van de gene annotation, zoals het type mutatie en het gen waar de mutatie heeft plaatsgevonden. 
+
 ### conclusie en vervolgstappen
+
+het script van vandaag moet nog verder gemaakt worden. ik wil nog kijken wat ik met de "NA" data ga doen, hoe ik de genen die invloed hebben op alcoholresistentie in R ga inbouwen en de uiteindelijke vergelijking van de genen.
+
