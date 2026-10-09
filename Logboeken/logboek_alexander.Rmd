@@ -789,6 +789,27 @@ jy304_df <- data.frame(jy304_bcsq_split_mutation, jy304_bcsq_split_gene)
 jy304_df
 ```
 
+dit ging niet helemaal zoals verwacht, dus ik probeer het volgende om wel aparte kolommen te maken van onze data:
+
+```{r}
+jy304_df <- data.frame()
+jy304_df$mutation <- jy304_bcsq_split_mutation
+
+```
+
+helaas geeft dit een foutmelding, dus ik kijk eerst in de documentatie van R. dit geeft mij het volgende commando:
+
+```{r}
+column_names <- c("mutations", "gene")
+jy304_bcsq_split_gene
+
+jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
+
+jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+jy304_df
+```
+
 ### resultaten 
 
 ### conclusie en vervolgstappen
