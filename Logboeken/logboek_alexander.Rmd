@@ -719,3 +719,89 @@ de resultaten van vandaag zijn het R-script zoals te zien bij de werkzaamheden v
 
 het script van vandaag moet nog verder gemaakt worden. ik wil nog kijken wat ik met de "NA" data ga doen, hoe ik de genen die invloed hebben op alcoholresistentie in R ga inbouwen en de uiteindelijke vergelijking van de genen.
 
+
+## 9/10/2026
+
+### doel van de dag
+
+het R script voor de vergelijking van data af proberen te maken
+
+### motivatie van aanpak
+
+wederom, dit is de laatste stap die voor de subset gedaan moet worden 
+
+### uitgevoerde werkzaamheden
+
+```{r eval=FALSE}
+library(dplyr)
+
+# het inlezen van onze data
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+# het geven van kolomnamen
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+# het splitten van de data van de "info" kolom
+jy304_info <- strsplit(jy304$info, ";")
+
+# deze sapply zorgt er voor dat alle lijnen van de gene annotation (die beginnen met BCSQ) worden opgeslagen
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+# dit commando zorgt ervoor dat de gene annotation lijnen op het "|" teken worden gesplitst
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+jy304_bcsq_split
+
+
+```
+
+de eerste stap die ik wil gaan doen hiermee is de NA's uit de dataset halen, hiervoor probeer ik na.omit:
+
+```{r eval=FALSE}
+na.omit(jy304_bcsq_split)
+```
+
+als ik dit run blijven de NA's in mijn dataset. dit heeft dus geen zin. daarna ben ik gaan zoeken naar andere manieren om de NA's uit de data te halen. eerst ben ik gaan kijken naar manieren om met R te bepalen welke lijnen NA bevatten, waarvoor ik de functie is.na heb gebruikt.
+
+```{r}
+is.na(jy304_bcsq_split)
+```
+
+ik had mijn manier in gedachten, maar na een kort onderonsje met marcel ben ik op de volgende manier gekomen om onze lijst te subsetten
+
+```{r eval=FALSE}
+# dit commando zorgt er voor dat alle mutatietypes in 1 kolom staan
+jy304_bcsq_split_mutation <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 1)
+
+# dit commando zorgt er voor dat alle genen in 1 kolom staan
+jy304_bcsq_split_gene <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 2)
+
+```
+
+van deze twee waardes probeer ik op de volgende manier een dataframe te maken:
+
+```{r}
+jy304_df <- data.frame(jy304_bcsq_split_mutation, jy304_bcsq_split_gene)
+
+jy304_df
+```
+
+### resultaten 
+
+### conclusie en vervolgstappen
+
+
+##
+
+### doel van de dag
+
+### motivatie van aanpak
+
+### uitgevoerde werkzaamheden
+
+### resultaten 
+
+### conclusie en vervolgstappen
