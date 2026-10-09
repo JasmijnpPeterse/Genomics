@@ -812,9 +812,59 @@ colnames(jy304_df) <- c("mutation", "gene")
 jy304_df
 ```
 
+dit heeft de dataframe succesvol gemaakt! de volgende stap is om de vergelijking klaar te zetten
+
 ### resultaten 
 
+de volledige code van vandaag en de dataframe die daaruit komt:
+
+```{r eval=FALSE}
+library(dplyr)
+
+# het inlezen van onze data
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+# het geven van kolomnamen
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+# het splitten van de data van de "info" kolom
+jy304_info <- strsplit(jy304$info, ";")
+
+# deze sapply zorgt er voor dat alle lijnen van de gene annotation (die beginnen met BCSQ) worden opgeslagen
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+# dit commando zorgt ervoor dat de gene annotation lijnen op het "|" teken worden gesplitst
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+# dit commando zorgt er voor dat alle mutatietypes in 1 kolom staan
+jy304_bcsq_split_mutation <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 1)
+
+# dit commando zorgt er voor dat alle genen in 1 kolom staan
+jy304_bcsq_split_gene <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 2)
+
+# eerst rbind ik de geneste lijsten van mijn mutaties naar een dataframe
+jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
+
+# daarna voeg ik de genen toe aan die lijst
+jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+# daarna zet ik de kolomnamen om naar duidelijkere namen. (die van gene was al wel goed, maar die van de mutatie nog niet)
+colnames(jy304_df) <- c("mutation", "gene") 
+
+jy304_df
+
+
+```
+
+verder heeft oscar de rest van de analysestappen gedaan, dus het vergelijken met de genen die wij hebben gevonden en de genen die volgens het gekozen onderzoek invloed hadden op de alcoholresistentie. hieruit kwam dat geen van onze mutaties in die lijst zit.
+
 ### conclusie en vervolgstappen
+
+de afwezigheid van genen die de alcoholresistentie beinvloeden betekend dat wij niet terug hebben gevonden in welke genen de mutaties zitten in de jy304 strain. dit kan meerdere dingen betekenen. het eerste wat dit kan betekenen is dat de alcoholresistentie wordt veroorzaakt in de regio's van het genoom die niet voor exonen coderen. dit betekend dat de mutaties in de intronen of promotorregio's van het genoom kunnen zitten, waardoor de eiwitten die alcoholresistentie beinvloeden vaker tot expressie komen (wat dus voor een hogere alcoholresistentie zorgt). een andere verklaring zou kunnen zijn dat niet alle cellen van de jy304 strain dezelfde mutatie hebben gehad die voor alcoholresistentie zorgt. omdat wij met onze pijplijn ook nog een kwaliteitsfiltering doen, kunnen de mutaties die niet vaak genoeg gevonden zijn weggefilterd zijn. hierdoor zouden wij geen mutaties kunnen vinden. een potentiele derde optie is dat de data van de onderzoekers niet klopt. hier ga ik niet van uit, aangezien het onderzoek peer-reviewed is en de data van het onderzoek online te vinden is. 
+hoe dan ook, wij hebben geen verschil kunnen vinden in de genen. een vervolgonderzoek wat mogelijk wel een antwoord zou kunnen geven is om te kijken naar de expressie van de verschillende genen. hierdoor zou je de mutaties die in promotorregio's of intronen gebeurt zijn niet letterlijk terug kunnen vinden, maar de resultaten van die mutaties wel. 
 
 
 ##
