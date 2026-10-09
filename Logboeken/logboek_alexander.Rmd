@@ -797,15 +797,17 @@ jy304_df$mutation <- jy304_bcsq_split_mutation
 
 ```
 
-helaas geeft dit een foutmelding, dus ik kijk eerst in de documentatie van R. dit geeft mij het volgende commando:
+helaas geeft dit een foutmelding, dus ik kijk eerst in de documentatie van R. dit geeft mij de volgende commandos:
 
 ```{r}
-column_names <- c("mutations", "gene")
-jy304_bcsq_split_gene
-
+# eerst rbind ik de geneste lijsten van mijn mutaties naar een dataframe
 jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
 
+# daarna voeg ik de genen toe aan die lijst
 jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+# daarna zet ik de kolomnamen om naar duidelijkere namen. (die van gene was al wel goed, maar die van de mutatie nog niet)
+colnames(jy304_df) <- c("mutation", "gene") 
 
 jy304_df
 ```
