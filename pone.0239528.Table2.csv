@@ -1,0 +1,41 @@
+Gene name;Systematic Name;Score;Description
+AAH1;YNL141W;8,26;adenine deaminase
+LTV1;YKL143W;8,05;EGO/GSE complex subunit, upstream of TOR complex
+FTR1;YER145C;7,72;iron permease
+RPL13A;YDL082W;7,72;ribosomal 60S subunit
+SNT1;YCR033W;7,71;deacetylase, positive regulation of stress-activated MAPK cascade
+AFG3;YER017C;7,59;mitochondrial metallopeptidase
+RPS16A;YMR143W;7,47;ribosomal 40S subunit
+TRM13;YOL125W;7,38;Methyltransferase
+EAP1;YKL204W;7,15;translation initiation factor, TOR pathway
+RPL14A;YKL006W;6,9;ribosomal 60S subunit
+RPL16B;YNL069C;6,8;ribosomal 60S subunit
+PIL1;YGR086C;6,51;eisosome assembly
+KSS1;YGR040W;6,11;MAP kinase
+PET117;YER058W;5,86;electron transport chain
+ASF1;YJL115W;4,2;nucleosome assembly factor, stress response
+MRP7;YNL005C;4,02;mitochondrial ribosomal large subunit
+VPS24;YKL041W;3,81;vacuolar protein sorting
+CTR1;YPR124W;3,74;copper transporter
+REG1;YDR028C;3,49;protein phosphatase regulator
+GAT2;YMR136W;3,34;transcription factor
+VPS69;YPR087W;-12,40;vacuolar protein sorting
+SIW14;YNL032W;-6,92;tyrosine phosphatase
+NGG1;YDR176W;-6,81;Acetyltransferase
+YJL047C-A;YJL047C-A;-6,79;unknown function
+DGA1;YOR245C;-6,38;acyltransferase, triglyceride biosynthesis
+INO2;YDR123C;-6,34;transcription factor, phospholipid biosynthesis
+IRC23;YOR044W;-6,16;unknown function
+VPS13;YLL040C;-5,97;vacuolar protein sorting
+SUE1;YPR151C;-5,96;degradation of cytochrome c
+UGA4;YDL210W;-5,79;GABA transport, located on vacuole membrane
+MON1;YGL124C;-5,70;guanine nucleotide exchange factor, located on vacuole membrane
+DUR3;YHL016C;-5,64;putrescine, spermidine, urea transporter
+ISN1;YOR155C;-5,53;nucleotidase, breaks IMP to inosine
+AHK1;YDL073W;-5,52;scaffold protein, important in osmotic stress
+YCF1;YDR135C;-5,32;glutathione transporter, located on vacuole membrane
+PMC1;YGL006W;-5,28;ATPase, located on vacuole membrane
+YGL015C;YGL015C;-5,25;unknown function
+YGL140C;YGL140C;-5,24;unknown function
+ICL1;YER065C;-5,24;isocitrate lyase, induced by growth on ethanol
+TUF1;YOR187W;-5,24;mitochondrial translation elongation factor
