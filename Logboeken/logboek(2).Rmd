@@ -4,15 +4,24 @@ Author: "Oscar Dogger"
 output: html_document
 ---
 
+# Introductie
+Voor dit onderzoek gaan Alexander, jasmijn en ik de data van een onderzoek analyseren: "Regulatory and evolutionary adaptation of yeast to acute lethal ethanol stress". In dit onderzoek hebben ze vooral transcriptomics gedaan. Ze hebben een strain van bakkersgist (S. cerevisiae) BY4741 10 tot 12 keer blootgesteld tot 24.5% alcohol voor 2 minuten. Hierdoor gaan dan veel cellen dood, waardoor er voornamelijk cellen blijven die genen hebben die ze alcohol resistetenter maakt dan andere gistcellen die niet ten kosten gaat van de groei snelheid. Hieruit is dan de jy304 bakersgist ontstaan, deze is zo een 35% alcohol resistenter dan de wild-type BY4741. Ongeveer 35% overleefd na een ronde ethanol in vergelijking met 1% van het origineel.
+Wij gaan gebasseerd af dit onderzoek een genomics onderzoek starten. Wij willen gaan kijken of we kunnen zien of de opgetreden mutaties echt mutaties zijn voor alcohol resistentie. Dit gaan wij doen met behulp van trimming, mapping, variant calling en gene annotation.
+
 # Data
-https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528#pone-0239528-t002
+De data die wij gaan gebruiken voor ons onderzoek komt van ons artikel: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528". Maar wij gaan niet alle data gebruiken die zij hebben. Wij willen gaan vergelijken tussen de pre-stress van de wild-type (SRR11923111) en jy304 (SRR11923116) deze hebben we hier gedownload: "https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa". Verder hebben we ook nog een referentiegenoom gebruikt voor het mappen en een gff file bij bcftools: "https://ncbi.nlm.nih.gov/datasets/genome/GCF_000146045.2/".
+
+# Tools
+In ons onderzoek hebben we verschillende tools gebruikt, hierbij staan de versies die we hebben gebruikt. Bij BCFtools hebben we 2 verschillende versies gerunt, op de subset de versie 1.23 en op de volledige set de versie 1.21. Dit kwam doordat de 1.21 al op de assemblix cluster was gedownload en we niet wouden updaten.
+fastqc V0.12.1
+Trimmomatic v0.39
+STAR: v2.7.11b
+bgzip: v1.18
+subset: BCFtools v1.23
+volledige set: BCFtools v1.21
 
 # Dagen
-doel van de dag
-motivatie
-uitgevoerde werkzaamhaden
-resultaten 
-concluse en vervolg stappen
+
 
 ## 13/09/2026 Zondag
 
@@ -690,24 +699,220 @@ We hebben besloten om alleen de 40 genen die ons artikel heeft publiek gemaakt t
 We kunnen nu trim etc gebruiken op onze hele dataset.
 Daarna moeten we nog iets van code schrijven om te kijken hoeveel van de gevonden genen in de lijst van 40 genen staat. Doordat we maar 40 van de 927 (192 goede 735 slechte) genen hebben zal het moeilijk / niet mogelijk zijn om een conclusie te trekken of andere genen invloed hebben op alcohol resistentie die niet direct invloed hadden op de knockout. Hierdoor krijgen we hopelijk reactie op mijn mail.
 
-## 15/09/2026
-### Doel van de dag
-### Motivatie van aanpak
-### Uitgevoerde werkzaamheden
-### Resultaten
-### Coclusie en vervolgstappen
+## 7/10/2026
 
-## 15/09/2026
 ### Doel van de dag
+De hele pijplijn te runnen.
 ### Motivatie van aanpak
+Door de hele pijplijn te runnen kunnen we genen gaan bekijken.
+
 ### Uitgevoerde werkzaamheden
+Ik heb vandaag mijn mail gecheckt en ik heb nog geen antwoord gekregen van Saeed Tavazoie.
+
+Als eerst hebben we trimmomatic gerunt op de hele dataset
+
+```{bash eval=FALSE}
+# naar directory met data
+cd /students/2026-2027/Thema05/Groep3/
+
+TrimmomaticSE -threads 4 fastq/SRR11923111.fastq Genomics/wildtype_prestress_trimmed.fastq
+
+TrimmomaticSE -threads 4 fastq/SRR11923116.fastq Genomics/jy304_prestress_trimmed.fastq
+
+```
+
+Nu hebben we trim gerunt we gaan nog fastqc runnen om te kijken of het adapter probleem is gefixt. Dit hebben we op jasmijn haar computer gerunt.
+
+hier uit kwam dat het adapter probleem is gefixt.
+
+We hebben hierna star gerunt
+
+```{bash eval=FALSE}
+# naar directory met data
+cd /students/2026-2027/Thema05/Groep3/Genomics
+
+STAR --genomeDir GenomeDir --readFilesIn jy304_prestress_trimmed.fastq -outFileNamePrefix jy304_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode Genecounts
+
+STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress_trimmed.fastq -outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode Genecounts
+```
+
 ### Resultaten
+We hebben trimmomatic gerunt en STAR, STAR is nog bezig dus hier zien we de resultaten straks van.
+
 ### Coclusie en vervolgstappen
+We hebben trimmomatic gerunt, we moeten nu op STAR wachten en dan verder gaan met BCFtools runnen.
+
+## 8/10/2026
+
+### Doel van de dag
+Alexander helpen met het script van de analyse
+### Motivatie van aanpak
+Dit is nog het laatste wat we moeten doen
+### Uitgevoerde werkzaamheden
+
+```{r eval=FALSE}
+library(dplyr)
+
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+jy304_info <- strsplit(jy304$info, ";")
+
+jy304_bcsq <- sapply(jy304_info, function(row) {
+    bcsq <- row[startsWith(row, "BCSQ=")]
+    bcsq[1]
+    })
+    
+jy304_bcsq_splitted <- strsplit(jy304_bcsq, "|", fixed=T)
+jy304_bcsq_splitted
+```
+
+Alexander had het origineel met rbind gedaan, hierdoor zijn we opzoek gegaan hoe je moet filteren op waar een element mee begint. Aangezien we een tabel hebben kunnen we met sapply over de elementen kijken in het tabel, hiermee hebben we dan de code hierboven. Om de lijnen te splitsen hebben we strsplit gebruikt, alleen dit splitte op alle. Dit moest niet want ik wou op de | splitten. Hierdoor heb ik fixed=T erachter gezet wat het fixed: "https://r-statistics.co/base-strsplit-in-R.html".
+Nu is de data goedsplits, maar er zijn nog wel NA's aanwezig.
+
+We hebben besloten om bij BCFtools ISEC qual van 25 te doen (1/316 zijn fout) en een bp van 20 te doen (aantal keer minimaal) Het runnen hiervan ging goed.
+
+Verder heb ik jasmijn nog geholpen met debuggen van de tools.
+
+### Resultaten
+We hebben nu onze volledige data set door de tools gerunt waardoor die klaar is voor verdere analyse.
+Verder is het R-script gemaakt zoals te zien bij werkzaamheden, dit script maakt een gesplitst tabel met daarin de data van gene annotation.
+
+### Coclusie en vervolgstappen
+De data set is volledig gerunt tot en met gene annotation. Verder moet het script van vandaag verder worden geschreven, we moeten gaan kijken wat we met de NA's gaan doen en of ze wel een probleem zijn. Daarna moeten we de genen gaan vergelijken met de genen die ze in het onderzoek hebben gevonden.
 
 ```{bash eval=FALSE}
 # naar directory met data
 cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
 ```
+
+## 9/10/2026
+### Doel van de dag
+Vergelijkings script afmaken
+
+### Motivatie van aanpak
+Zonder het vergelijken met de genen die de onderzoekers hebben gevonden weten we niet of onze gevonden genen zeker invloed hebben.
+
+### Uitgevoerde werkzaamheden
+Voor de uiteindelijke vergeijking hebben we een lijst aan genen nodig, deze is niet te downloaden in hun onderzoek staat er alleen een foto (figuur S2) : https://doi.org/10.1371/journal.pone.0239528.t002 
+Doordat wij niet onze code data uit een foto kunnen laten lezen heb ik met de hand het tabel overgetikt, dit tabel heb ik daarna in de github gezet en is te vinden hier (pone.0239528.Table2.xlsx) : https://github.com/JasmijnpPeterse/Genomics/blob/main/pone.0239528.Table2.xlsx
+Verder heb ik het ook nog gexporteerd naar een csv die is hier te vinden (pone.0239528.Table2.xlsx) : https://github.com/JasmijnpPeterse/Genomics/blob/main/pone.0239528.Table2.csv
+
+
+```{r}
+gene <- c("AAA","BBB", "CC")
+mutations <- c("A","T","C")
+mutations
+jy304_df <- data.frame(Mutations = mutations, Gene = gene)
+jy304_df
+```
+
+Alexander probeert onze data in een tabel te zetten hiervoor ben ik opzoek gegaan om het internet en het hierboven stuk coden gemaakt, dit werkte niet bij alexander doordat zijn data in 1 lange colomn zit en bij mij in verschillende rows.
+
+```{r}
+library(dplyr)
+
+# het inlezen van onze data
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+# het geven van kolomnamen
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+# het splitten van de data van de "info" kolom
+jy304_info <- strsplit(jy304$info, ";")
+
+# deze sapply zorgt er voor dat alle lijnen van de gene annotation (die beginnen met BCSQ) worden opgeslagen
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+# dit commando zorgt ervoor dat de gene annotation lijnen op het "|" teken worden gesplitst
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+# dit commando zorgt er voor dat alle mutatietypes in 1 kolom staan
+jy304_bcsq_split_mutation <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 1)
+
+# dit commando zorgt er voor dat alle genen in 1 kolom staan
+jy304_bcsq_split_gene <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 2)
+
+jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
+
+jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+colnames(jy304_df) <- c("mutation", "gene")
+
+jy304_df
+```
+
+Dit is dan de volledig code om jy304_df te maken
+nu moeten we de genen file gaan inladen die ik eerder heb gemaakt
+
+```{r}
+genen_onderzoek <- read.table("/students/2026-2027/Thema05/Groep3/Genomics/alcoholgenen/pone.0239528.Table2.csv")
+genen_onderzoek
+```
+Hier komt de volgende error uit: "Error in scan(file = file, what = what, sep = sep, quote = quote, dec = dec,  : 
+  line 1 did not have 7 elements"
+Deze error komt zeer verschijnlijk doordat er comma's in de tekst staan, om dit te omzeilen ga ik de file opnieuw formaten door de invloed waardes weg te halen en de descripties text weg te halen, dit heb ik daarna gecommit
+  
+```{r}
+genen_onderzoek <- read.table("/students/2026-2027/Thema05/Groep3/Genomics/alcoholgenen/pone.0239528.Table2.csv")
+genen_onderzoek
+```
+Hier kwam nog steeds een error uit doordat er een spatie stond in de headers, dit heb ik gefixt doormiddel van de spaties te veranderen naar een _.
+
+```{r}
+genen_onderzoek <- read.table("/students/2026-2027/Thema05/Groep3/Genomics/alcoholgenen/pone.0239528.Table2.csv", header = TRUE, sep = ";")
+genen_onderzoek
+intersect(jy304_df$gene, genen_onderzoek$Gene_name)
+intersect(jy304_df$gene, genen_onderzoek$Systematic_Name)
+```
+Dit werkt, ik heb hem nu geintersect ik ga nu de code naar jasmijn sturen waarmee we het samen gaan runnen op de volledige data set.
+De volledige code:
+```{r}
+library(dplyr)
+
+# het inlezen van onze data
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+# het geven van kolomnamen
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+# het splitten van de data van de "info" kolom
+jy304_info <- strsplit(jy304$info, ";")
+
+# deze sapply zorgt er voor dat alle lijnen van de gene annotation (die beginnen met BCSQ) worden opgeslagen
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+# dit commando zorgt ervoor dat de gene annotation lijnen op het "|" teken worden gesplitst
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+# dit commando zorgt er voor dat alle mutatietypes in 1 kolom staan
+jy304_bcsq_split_mutation <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 1)
+
+# dit commando zorgt er voor dat alle genen in 1 kolom staan
+jy304_bcsq_split_gene <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 2)
+
+jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
+
+jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+colnames(jy304_df) <- c("mutation", "gene")
+
+genen_onderzoek <- read.table("/students/2026-2027/Thema05/Groep3/Genomics/alcoholgenen/pone.0239528.Table2.csv", header = TRUE, sep = ";")
+genen_onderzoek
+intersect(jy304_df$gene, genen_onderzoek$Gene_name)
+intersect(jy304_df$gene, genen_onderzoek$Systematic_Name)
+
+```
+
+### Resultaten
+### Coclusie en vervolgstappen
 
 ## 5/10/2026
 ### Doel van de dag
