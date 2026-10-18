@@ -8,15 +8,30 @@ output: html_notebook
 
 ## Introductie
 
+Voor dit onderzoek gaan Jasmijn, Oscar en ik de data van een experiment onderzoeken (te vinden op https://doi.org/10.1371/journal.pone.0239528). in het originele experiment hebben de onderzoekers vooral transcriptomics gedaan. daarin hebben zij een wildtype strain aan bakkersgist (S. Cerevisiae) zitten kweken die beter resistent zou moeten zijn tegen alcohol. dit hebben zij gedaan door het wildtype bloot te stellen aan alcohol in een oplossing van 24.5%. daarmee hebben zij de meeste gistcellen gedood, maar de cellen die levend zijn gebleven hebben zij doorgekweekt en dit proces 10 tot 12 x mee herhaald, totdat een overleving van ongeveer 35% vergeleken met de ouderlijke stam was behaald onder de gistcellen.
+wij gaan gebaseerd op dit onderzoek een genomics onderzoek starten. wij willen namelijk kijken of wij kunnen controleren of de mutaties daadwerkelijk op de genen die invloed hebben op alcoholresistentie hebben plaatsgevonden. dit gaan wij doen met behulp van trimming, mapping, variant calling en gene annotation. 
 
 ## Data
-De data die wij gebruiken is een deel van de data van het volgende artikel: https://doi.org/10.1371/journal.pone.0239528 of de link direct naar de data: https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa . uit deze data hebben wij voor ons experiment gekozen uit de pre-stress RNA-seq data van beide stammen (wildtype en JY304). dit zijn samples SRR11923111 (wildtype) en SRR11923116 (JY304).
+
+De data die wij gebruiken is een deel van de data van het volgende artikel: https://doi.org/10.1371/journal.pone.0239528 of de link direct naar de data: https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa . uit deze data hebben wij voor ons experiment gekozen uit de pre-stress RNA-seq data van beide stammen (wildtype en JY304). dit zijn samples SRR11923111 (wildtype) en SRR11923116 (JY304). het referentiegenoom dat wij hebben gebruikt is het S288C referentiegenoom van bakkersgist (S. Cerevisiae, te vinden op https://www.ncbi.nlm.nih.gov/datasets/taxonomy/559292/).
+om deze data te onderzoeken hebben wij gebruik gemaakt van de volgende tools:
+- fastQC v0.12.1
+- TrimmomaticSE v0.39
+- STAR v2.7.11b
+- BCFtools v1.21*
+- bgzip v1.18
+
+* BCFtools v1.21 is gebruikt op de volledige dataset, op de subset is BCFtools v1.23 gebruikt.
 
 ## 6/9/2026
 
 ### doel van de dag
+
 een artikel vinden om ons onderzoek op te bouwen
+
 ### motivatie van aanpak
+
+wij moeten een experiment uitzoeken om na te bootsen voor genomics
 
 ### uitgevoerde werkzaamheden
 vandaag hebben wij gekeken naar onderzoeken die ons interessant lijken. Er is op ncbi gezocht naar de zoekterm: 'Genome variation profiling by high throughput sequencing'. daaruit is het artikel dat bij resultaten beschreven staat gekomen voor genomics. verder hebben wij dat artikel doorgenomen.
@@ -193,15 +208,666 @@ helaas bracht dit mij weer hetzelfde probleem, namelijk dat de plots niet gemaak
 pip install --upgrade "kaleido>=1"
 ```
 
-na het runnen van dit commando heb ik opnieuw geprobeerd om multiqc aan te roepen met het eerder genoemde commando. dit gaf mij de foutmelding dat er op het systeem geen google chrome stond. door deze foutmelding ben ik vanuit de assemblix server teruggegaan naar mijn nuc (nuc406).
+na het runnen van dit commando heb ik opnieuw geprobeerd om multiqc aan te roepen met het eerder genoemde commando. dit gaf mij de foutmelding dat er op het systeem geen google chrome stond. door deze foutmelding ben ik vanuit de assemblix server teruggegaan naar mijn nuc (nuc406). hier heb ik het commando net wat anders gerund, namelijk:
+
+```{bash eval=FALSE}
+multiqc -p ..
+```
+
+dit zorgt er voor dat de foto's in een andere folder worden gezet. hierdoor kan ik zien of ze uberhaupt zijn aangemaakt of niet. na deze run waren de plots wel gemaakt, maar kon ik ze nog steeds niet in het html bestand zien. daarom heb ik het html bestand geopend in een andere browser en daarin werkten ze wel. het bestand is te vinden als /students/2026-2027/Thema05/Groep3/subset/quality_control/venv/multiqc_report_2.html . 
+
+tijdens het updaten van mijn logboek moest ik nog mijn ssh van de schoolcomputers in github zetten om de repo ook op deze systemen te krijgen. bij het maken van de commit van mijn logboek liep ik aan tegen de standaard text editor van de commit messages. ik heb dit in de eerste instantie omzeilt met git commit -m, maar om dit voor later nog op te lossen heb ik het volgende commando gerund, met behulp van ronald:
+
+```{bash eval=FALSE}
+git config --global core.editor "nano" 
+```
+
+hierdoor is mijn standaard texteditor voor git veranderd naar nano (wat ik wel snap).
+
+### resultaten
+een multiqc met daarin de data van onze beide fastqc bestanden in een enkel bestand. of dit bestand zelf een functie heeft voor ons project is nog een vraag, maar het klaarzetten van de tool en de foutmeldingen oplossen is zeker een leerzaam process geweest. verder is mijn github ook werkzaam gemaakt op de schoolcomputers. 
+
+### conclusie en vervolgstappen
+de mapping moet nog gedaan worden. daar wil ik de volgende keer volop mee bezig, zodat de variant calling ook zsm gedaan kan worden.
+
+
+## 25/9/2026 
+
+### doel van de dag
+het doel van vandaag is om de read mapping uit te voeren met STAR en om de variant calling te doen met bcftools. 
+
+### motivatie van aanpak
+om onze uiteindelijke vergelijking te doen moeten wij eerst de reads mappen en daarna nog de varianten vinden.
+
+### uitgevoerde werkzaamheden
+het eerste wat wij moeten doen om met STAR de read mapping uit te voeren is het referentiegenoom downloaden. wij hebben gekozen voor het S288C referentiegenoom van gist, te vinden op https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000146045.2/ . deze data hebben wij gedownload als "refseq only", "genome sequences (FASTA)" en "annotation features (GTF)". deze heb ik daarna verplaatst naar de folder /students/2026-2027/Thema05/Groep3/subset/quality_control. de GCF-file van de sequentie en de .gtf-file heb ik daarna verplaatst naar de map /students/2026-2027/Thema05/Groep3/subset. daarna ben ik zelf genavigeerd naar de map en heb ik het volgende commando gerund van STAR om een index te maken van het referentiebestand:
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeDir /star --genomeFastaFiles GCF_000146045.2_R64_genomic.fna --sjdbGTFfile genomic.gtf --sjdbOverhang 149
+```
+dit gaf de volgende foutmelding: "EXITING because of fatal OUTPUT FILE error: could not create output directory: /star for --genomeDir /star/
+ ERROR: Permission denied"
+ 
+wij hebben dit proberen op te lossen door het stuk "--genomeDir /star" uit het commando te halen, zoals hieronder te zien:
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles GCF_000146045.2_R64_genomic.fna --sjdbGTFfile genomic.gtf --sjdbOverhang 149
+```
+
+dit gaf ons de foutmelding: "EXITING because of INPUT ERROR: could not open genomeFastaFile: GCF_000146045.2_R64_genomic.fna". door te kijken naar de rechten van de bestanden werd het duidelijk dat die alleen voor mij (owner) op "rw" stonden. deze heb ik veranderd door middel van chmod 777. helaas gaf dit ons weer een foutmelding, namelijk: "EXITING because of INPUT ERROR: could not open genomeFastaFile: GCF_000146045.2_R64_genomic.fna" we hebben geprobeerd dit via de "normale" terminal te runnen in plaats van op die van rstudio. dit werkte op een of andere manier wel. wel gaf STAR het volgende aan:"!!!!! WARNING: --genomeSAindexNbases 14 is too large for the genome size=12157105, which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases 10
+". dus we hebben het commando opnieuw gerunt maar dan op de volgende manier:
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles GCF_000146045.2_R64_genomic.fna --sjdbGTFfile genomic.gtf --sjdbOverhang 149 --genomeSAindexNbases 10
+```
+
+het uitvoeren van dit commando lukte wel zonder foutmeldingen! hieruit hebben wij een geindexte versie van ons genoom.
+in dit commando doen de tweaks het volgende:
+--runMode: dit geeft aan dat wij STAR gebruiken om een index te maken
+--genomeFastaFiles: hiermee bepaal je welk bestand het genoom is.
+--sjdbGTFfile: hiermee geef je aan welk bestand het gtf bestand is voor het genoom
+--sjdbOverhang: dit is hoe ver STAR om een splice site heen kijkt. aangeraden was om dit de read length -1 te maken.
+--genomeSAindexNbases: Grootte van de index, de default is 14. wij hebben 10 gebruikt als aanrader van STAR. 
+
+```{bash eval=FALSE}
+#gerunt op de map /students/2026-2027/Thema05/Groep3/subset
+#voor het wildtype
+STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts
+
+#voor de jy304 strain
+STAR --genomeDir GenomeDir --readFilesIn jy304_prestress.fastq --outFileNamePrefix jy304_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts
+```
+
+de tweaks van STAR in deze run doen het volgende: 
+--genomeDir: hier geef je aan in welke directory het (geindexeerde) genoom staat
+--readFilesIn: dit geeft aan welk bestand je wilt gebruiken om te mappen
+--outFileNamePrefix: STAR maakt meerdere bestanden. hiermee geef je aan waar die namen mee beginnen.
+--outSAMtype: dit is het type outputbestand
+--outSAMattributes: hier kan je voor sam/bam bestanden verschillende tags toevoegen (zie https://samtools.github.io/hts-specs/SAMtags.pdf voor meer informatie)
+--quantMode: dit zorgt ervoor dat STAR een extra outputbestand maakt met daarin de gene counts (hoeveel reads per gen). bij nader inzien gaan wij deze niet gebruiken, dus zou dit in de toekomst weggelaten kunnen worden.
+
+dit was succesvol. om daarna inzicht te krijgen op de gemapte bestanden die wij hebben hebben wij het volgende commando gerunt:
+
+```{bash eval=FALSE}
+samtools flagstat /students/2026-2027/Thema05/Groep3/subset/star/wildtype_prestress/wildtype_prestressAligned.sortedByCoord.out.bam
+```
+
+hieruit kwam het volgende:"
+114995 + 0 in total (QC-passed reads + QC-failed reads)
+87668 + 0 primary
+27327 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+114995 + 0 mapped (100.00% : N/A)
+87668 + 0 primary mapped (100.00% : N/A)
+0 + 0 paired in sequencing
+0 + 0 read1
+0 + 0 read2
+0 + 0 properly paired (N/A : N/A)
+0 + 0 with itself and mate mapped
+0 + 0 singletons (N/A : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+"
+dit betekend dat 100% van onze subset gemapt is aan het genoom. wel is het opmerkelijk dat de subset maar 100000 samples was en STAR meer dan 100000 maps heeft, maar dit is waarschijnlijk doordat er meerdere plekken zijn waar sommige samples passen.
+
+om hierna de variant calling te doen, hebben wij gekozen voor bcftools. hiermee moeten wij eerst een pileup-bestand maken en daarna de daadwerkelijke variant calling. de pileup hebben wij eerst gekeken wat de parameters voor het commando zijn op https://samtools.github.io/bcftools/howtos/variant-calling.html. hier kwam uit dat de "-f" en "-o" vooral belangrijk was om het referentiegenoom en . het commando hebben wij als volgt gerunt:
+```{bash eval=FALSE}
+#voor het wildtype
+bcftools mpileup -f /students/2026-2027/Thema05/Groep3/subset/GCF_000146045.2_R64_genomic.fna -o /students/2026-2027/Thema05/Groep3/subset/mpileup_output/wildtype_pileup /students/2026-2027/Thema05/Groep3/subset/star/wildtype_prestress/wildtype_prestressAligned.sortedByCoord.out.bam
+
+#voor de jy304 strain
+bcftools mpileup -f /students/2026-2027/Thema05/Groep3/subset/GCF_000146045.2_R64_genomic.fna -o /students/2026-2027/Thema05/Groep3/subset/mpileup_output/jy304_pileup /students/2026-2027/Thema05/Groep3/subset/star/jy304_prestress/jy304_prestressAligned.sortedByCoord.out.bam
+```
+
+hieruit hebben we 2 pileup-files gekregen die wij kunnen gebruiken voor de variant calling. om achter de mogelijke parameters te komen hebben wij "bcftools call" in de terminal gerunt. hieruit kwamen de volgende parameters:
+-mv: dit geeft een multiallelic caller en alleen maar variants. 
+-Ov: dit geeft de output als een vcf-bestand
+-o: het outputbestand
+
+```{bash eval=FALSE}
+#voor het wildtype
+bcftools call -mv -Ov -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/wildtype_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/wildtype_pileup
+
+#voor de jy304 strain
+bcftools call -mv -Ov -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/jy304_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/jy304_pileup
+```
+
+bcftools is er zelf van uitgegaan dat onze cellen diploid zijn. nadat wij terug hebben gekeken in het originele experiment op pubmed, zijn wij er achter gekomen dat onze gistcellen haploid zijn. daarom hebben wij het opnieuw gerunt op de volgende manier: 
+
+```{bash eval=FALSE}
+#voor het wildtype
+bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/wildtype_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/wildtype_pileup
+
+#voor de jy304 strain
+bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/subset/variant_calls/jy304_calls /students/2026-2027/Thema05/Groep3/subset/mpileup_output/jy304_pileup
+```
+
+--ploidy 1 zorgt er dus voor dat de variant calling haploid gedaan wordt
 
 ### resultaten
 
+wij hebben voor beide strains nu de read mapping gedaan, een pileupbestand gemaakt en de variant calling gedaan. de bestanden voor de read mapping zijn te vinden onder de map /students/2026-2027/Thema05/Groep3/subset/star . de pileupbestanden zijn te vinden onder de folder /students/2026-2027/Thema05/Groep3/subset/mpileup_output en de variant calling bestanden zijn te vinden onder de map /students/2026-2027/Thema05/Groep3/subset/variant_calls.
+
 ### conclusie en vervolgstappen
 
+vandaag was een succes. we hebben de stappen van onze pijplijn gedaan die wij moesten uitvoeren ook daadwerkelijk gedaan. wat wij nu nog moeten doen is nadenken hoe wij de daadwerkelijke analyse gaan doen. wij willen namelijk een subtraction analysis doen, waar wij dus de varianten van het wildtype van de varianten van de jy304 strain willen aftrekken om te kijken of wij de genen kunnen vinden die voor alcoholresistentie zorgen. er moet nog uitgezocht worden hoe dit gedaan moet worden.
 
+
+
+## 28/9/2026
+
+### doel van de dag
+
+vandaag willen wij proberen om subtraction analysis op de twee strains te doen.
+
+### motivatie van aanpak
+
+om te kunnen zien welke genen er anders zijn/helpen met de alcoholresistentie proberen wij te kijken naar de mutaties die wel in de jy304 strain zitten en niet in het wildtype zitten. vandaar de keuze van subtraction analysis
+
+### uitgevoerde werkzaamheden
+
+het eerste wat wij hebben gedaan is kijken naar mogelijke manieren/tools die wij kunnen gebruiken om de subtraction analysis mee uit te voeren. door deze zoektocht zijn wij tot de conclusie gekomen dat bcftools isec hiervoor te gebruiken is (verdere documentatie op https://samtools.github.io/bcftools/bcftools.html#isec). wij runnen dit commando als volgt:
+
+``` {bash eval=FALSE}
+# op weg naar de juiste directory
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+# het daadwerkelijke commando
+bcftools isec -p subtraction_analysis jy304_calls wildtype_calls
+```
+
+dit geeft de foutmelding "Failed to open jy304_calls: not compressed with bgzip". ik heb geprobeerd dit op te lossen door de namen van de bestanden te laten eindigen met .vcf. dit had geen effect. daarom proberen wij de bestanden te zippen met bgzip. dit heb ik gerund door het volgende commando:
+
+```{bash eval=FALSE}
+# voor de juiste directory
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+# het daadwerkelijke commando
+bgzip jy304_calls.vcf.gz
+bgzip wildtype_calls.vcf.gz
+```
+
+dit heeft onze bestanden veranderd naar .vcf.gz. het was de bedoeling om de originele bestanden ook nog te houden, wat helaas fout is gegaan. dit komt omdat wij niet de tweak -c hebben gebruikt.
+daarna hebben wij het volgende commando proberen te runnen:
+
+```{bash eval=FALSE}
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+bcftools isec -p subtraction_analysis jy304_calls.vcf.gz wildtype_calls.vcf.gz
+```
+dit gaf de volgende foutmelding:
+
+"Failed to open jy304_calls: not compressed with bgzip
+[E::hts_idx_load3] Could not load local index file 'jy304_calls.vcf.gz.csi' : Permission denied
+Failed to open jy304_calls.vcf.gz: could not load index"
+
+dit hebben wij opgelost door eerst een index te maken:
+
+```{bash eval=FALSE}
+# juiste directory
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+# het commando voor beide strains uitgevoerd
+bcftools index wildtype_calls.vcf.gz
+bcftools index jy304_calls.vcf.gz
+```
+
+hierdoor hebben wij de index bestanden gemaakt. hiermee zouden wij dus de bcftools isec moeten kunnen runnen. na het maken van de index hebben wij weer het bcftools isec commando gerunt:
+
+```{bash eval=FALSE}
+cd /students/2026-2027/Thema05/Groep3/subset/variant_calls
+
+bcftools isec -p substraction_analysis jy304_calls.vcf.gz wildtype_calls.vcf.gz
+```
+
+-p zorgt voor een nieuwe output directory waar onze data in gemaakt wordt. dit maakt de volgende bestanden in de folder /students/2026-2027/Thema05/Groep3/subset/variant_calls/substraction_analysis:
+
+0000.vcf: hierin staan de mutaties van jy304 die niet voorkomen in het wildtype.
+0001.vcf: hierin staan de mutaties van het wildtype die niet voorkomen in jy304.
+0002.vcf: hierin staan de mutaties van de jy304 strain die ook voorkomen in het wildtype.
+0003.vcf: hierin staan de mutaties van het wildtype die ook voorkomen in de jy304 strain.
+sites.txt: in dit bestand staan de "common sites" van beide bestanden.
+
+
+### resultaten
+
+de output van het isec commando is als volgt:
+0000.vcf: hierin staan de mutaties van jy304 die niet voorkomen in het wildtype.
+0001.vcf: hierin staan de mutaties van het wildtype die niet voorkomen in jy304.
+0002.vcf: hierin staan de mutaties van de jy304 strain die ook voorkomen in het wildtype.
+0003.vcf: hierin staan de mutaties van het wildtype die ook voorkomen in de jy304 strain.
+sites.txt: in dit bestand staan de "common sites" van beide bestanden.
+
+het verschil in de 0002 en 0003 bestanden is welk bestand het "moederbestand" is. de mutaties die in beide bestanden voorkomen zijn hetzelfde, maar de aantallen waarin ze voorkomen kan wel verschillen.
+
+### conclusie en vervolgstappen
+
+we hebben vandaag de subtraction analyse laten doen door een tool. wij moeten nog kijken of en hoe hoog wij willen filteren en waar de mutaties zich daadwerkelijk bevinden. 
+
+
+## 30/09/2026
+
+### doel van de dag
+
+vandaag is het doel om de mutaties te plaatsen op de genen van een gistcel.
+
+### motivatie van aanpak
+
+blijkbaar had oscar gisteren al de filtering gedaan op kwaliteit en depth, dus kunnen wij vandaag focussen om onze mutaties tegen de genen te plaatsen. dit doen wij zodat wij de genen kunnen bekijken waar de mutaties hebben plaatsgevonden, en mogelijk kunnen bepalen of dit genen zijn die voor alcoholresistentie zorgen.
+
+### uitgevoerde werkzaamheden
+
+eerst heb ik op ncbi gezocht naar de genen van de S288C giststrain (https://www.ncbi.nlm.nih.gov/datasets/gene/GCF_000146045.2/). hieruit blijkt dat deze strain toch wel bijna 6500 genen heeft. voor variant annotation moeten we dus een tool vinden of zelf een script schrijven. na even zoeken zijn wij achter het commando "bcftools csq" gekomen voo onze gene annotation. om deze tool te laten werken heb ik eerst het genoom van de S288C strain gedownload als "refseq only" en "annotated variants (.gff)". daarna hebben wij de tool gerunt als volgt:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+met hierin de de volgende tweaks
+-g: het "annotated variants" .gff bestand van de S288C strain. deze moet van de zelfde strain komen als het referentiegenoom
+-f: het referentiegenoom van de S288C strain
+-o: outputbestand, naam en directory
+
+dit gaf de foutmelding "Error: cannot write to ./variant_annotation/variant_annotation_jy304: No such file or directory". dit probeer ik op te lossen door deze directory te maken, maar dat lukte niet. daarom hebben we dit proberen op te lossen zonder de output in deze directory te zetten, als volgt:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+dit werkte, maar gaf tijdens het runnen ook het volgende: "Warning: 7185 warnings were suppressed, increase verbosity to see them all"
+daarom hebben wij het commando opnieuw proberen te runnen:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+-v zorgt hier voor de "verbosity", ofwel hoeveel de tool ons verteld en in welk detail. 2 is een hoger detail en 0 is dat de tool helemaal niks verteld.
+dit crashte, waarschijnlijk omdat de tool te veel wilde printen. daarom hebben wij het afgeschreven naar een bestand (warnings.log) op de volgende manier:
+
+```{bash eval=FALSE}
+# locatie 
+cd /students/2026-2027/Thema05/Groep3/subset
+
+# het daadwerkelijke commando
+bcftools csq -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings.log ./variant_calls/substraction_analysis/0000.vcf -o ./variant_annotation/variant_annotation_jy304
+
+```
+
+dit zorgde ervoor dat alle 7000+ waarschuwingen zijn afgeschreven naar het warnings.log bestand. bijna al deze waarschuwingen zagen er ongeveer zo uit: "Warning: Ignoring GFF feature with unknown phase .. NC_001133.9	RefSeq	exon	1807	2169	.	-	.	ID=exon-NM_001180043.1-1;Parent=rna-NM_001180043.1;Dbxref=GeneID:851229,GenBank:NM_001180043.1;end_range=2169,.;gbkey=mRNA;gene=PAU8;locus_tag=YAL068C;partial=true;product=seripauperin PAU8;start_range=.,1807;transcript_id=NM_001180043.1". dit lijkt er op dat de tool de lijnen van het gff bestand ziet als fouten.
+zelf hebben wij niet de oplossing hiervoor gevonden, maar na een korte bespreking met Ronald zijn wij tot de conclusie dat wij het referentiegenoom (en de .gff) van ensemble zelf moeten downloaden/maken voor deze stap. de versie van het referentiegenoom op ensemble is een GCA, de versie van het referentiegenoom op ncbi is een GCF. Daarom maken wij de keuze om het referentiegenoom van ncbi zelf om te zetten, aangezien GCF-versies vaak zijn gecontroleerd door ncbi en GCA- versies niet gecontroleerd zijn. 
+voor het omzetten van onze willen wij de tool gff2gff van bcftools gebruiken. deze in de terminal runnen lukte alleen niet, omdat de tool niet gevonden kon worden. na nog een consult met Ronald hebben wij de folder voor gff2gff in onze path moeten zetten. dit heb ik gedaan door het volgende te runnen:
+
+```{bash eval=FALSE}
+nano ~/.bashrc
+```
+
+dit opent de text editor. hierin moet er de volgende lijn geplakt worden: "export PATH="/homes/ajltfluttert/binfo/toolbox/bcftools-1.23/misc:$PATH" ". hierdoor krijgt de terminal ook te zien waar het commando gff2gff staat. daarna hebben wij het commando gerunt op de volgende manier:
+
+```{bash eval=FALSE}
+# veranderen naar locatie
+cd /students/2026-2027/Thema05/Groep3/subset
+
+gff2gff genomic.gff > genomic.csq.gff
+```
+
+dit geeft de volgende foutmelding: "/tmp/RtmpeNeCti/chunk-code-2c787071c61507.txt: line 4: genomic.csq.gff: Permission denied"
+dit zou aan moeten geven dat de permissies die wij hebben niet voldoende zijn, maar de file subset staat volledig open voor iedereen in principe (rwxrwxrwx). daar ligt het dus niet aan. na op te zoeken wat er fout gegaan kan zijn hebben wij de tool nog een keer proberen te runnen
+
+```{bash eval=FALSE}
+gff2gff < /students/2026-2027/Thema05/Groep3/subset/genomic.gff > /students/2026-2027/Thema05/Groep3/subset/genomic.csq.gff
+
+```
+
+deze run werkte succesvol. hieruit hebben wij de goed geformatte versie van onze annotation file gekregen. Oscar heeft deze nog een keer proberen te runnen met "bcftools csq", maar in plaats van 7000+ waarschuwingen hebben we nu 13000+ waarschuwingen gekregen. 
+
+### resultaten
+
+we hebben een "beter" geformatte versie van onze annotation file gekregen.
+
+### conclusie en vervolgstappen
+
+de daadwerkelijke annotatie moet nog een keer gebeuren. volgende keer gaan wij onderzoeken of de GCA versie van het referentiegenoom op ensemble minder waarschuwingen geeft en hopelijk hebben wij dan een geannoteerde versie van ons genoom.
+
+## 2/10/2026
+
+### doel van de dag
+
+het doel van vandaag is om het GCA-referentiegenoom te downloaden en onze pijplijn daar op te runnen.
+
+### motivatie van aanpak
+
+omdat wij bij de variant annotation van vorige keer enorm veel foutmeldingen kregen, willen wij proberen of het met de gca-versie van het referentiegenoom beter werkt. het nadeel is wel dat hier dus niet naar gekeken is door professionals van ncbi.`
+
+### uitgevoerde werkzaamheden
+
+eerst heb ik vandaag het GCA-referentiegenoom gedownload van ensembl. dit heb ik gedaan op https://www.ebi.ac.uk/ena/browser/view/GCA_000146045.2 en https://ftp.ebi.ac.uk/pub/ensemblorganisms/GCA/000/146/045/2/community/2018_10/geneset/ . bij die eerste link heb ik het bestand GCA_000146045.2.fasta.gz van het referentiegenoom gedownload. bij de tweede link heb ik de bestanden genes.gff3.gz, genes.embl.gz en genes.gtf.gz gedownload. deze heb ik hierna verplaatst naar de map /students/2026-2027/Thema05/Groep3/subset/retry_gca verplaatst. ik heb hier ook een kopie van onze in het begin gemaakte subset in gezet, zodat we de pijplijn helemaal opnieuw kunnen doen met het GCA-referentiegenoom. hier ben ik weer begonnen met mappen met star: 
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta.gz --sjdbGTFfile /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf.gz --sjdbOverhang 149 --genomeSAindexNbases 10
+```
+
+dit gaf de volgende foutmelding "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta.gz is not fasta: the first character is '' (31), not '>'.
+ Solution: check formatting of the fasta file. Make sure the file is uncompressed (unzipped)."
+ eerst moet ik dus ervoor zorgen dat de bestanden unzipped worden. dit probeer ik met het commando unzip:
+ 
+```{bash eval=FALSE}
+#voor het referentiegenoom
+gunzip /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta.gz
+
+#voor het genes.gff3 bestand
+gunzip /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gff3.gz
+
+#voor het genes.gtf bestand
+gunzip /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf.gz
+```
+
+dit heeft zonder problemen gerund. hieruit heb ik de bestande GCA_000146045.2.fasta, genes.gff3 en genes.gtf gekregen. hiermee heb ik het STAR commando opnieuw proberen te runnen, maar dan met niet gezipte bestanden:
+
+```{bash eval=FALSE}
+STAR --runMode genomeGenerate --genomeFastaFiles /students/2026-2027/Thema05/Groep3/subset/retry_gca/GCA_000146045.2.fasta --sjdbGTFfile /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf --sjdbOverhang 149 --genomeSAindexNbases 10
+```
+
+dit gaf de foutmelding: "Fatal INPUT FILE error, no valid exon lines in the GTF file: /students/2026-2027/Thema05/Groep3/subset/retry_gca/genes.gtf
+Solution: check the formatting of the GTF file. One likely cause is the difference in chromosome naming between GTF and FASTA file.". 
+gebaseerd hierop heb ik de bestanden bekeken en vooral gelet op het format hiervan. wat hier opvalt is dat de genes.gtf van ensembl begint met "IV	sgd", wat waarschijnlijk slaat op dat het data is uit chromosoom 4. ik heb gekeken naar de oplossing hiervoor. een van de dingen die aangeraden wordt is om te controleren of mijn chromosomen wel dezelfde numering hebben in beide bestanden. na dit te controleren kom ik tot de conclusie dat ze beide gebruik maken van romeinse cijfers. dit zou dus in principe niet het probleem moeten zijn. na verder zoeken heb ik ook dingen gevonden zoals "zorg dat beide bestanden van dezelfde plek komen", maar wij hebben ze allebei van ensembl, dus dit zou ook niet fout moeten gaan. helaas moet ik het voor vandaag hierbij opgeven.
+
+### resultaten
+
+er zijn helaas geen resultaten vandaag. de foutmeldingen waar ik tegenaan ben gelopen heb ik helaas niet op kunnen lossen. 
+
+### conclusie en vervolgstappen
+
+we moeten nog steeds onze pijplijn opnieuw proberen te runnen met het GCA-genoom, zodat wij kunnen vinden of dit even veel foutmeldingen geeft. verder moeten wij nog kijken wat wij met onze uiteindelijke gene annotation kunnen doen.
+
+
+## 5/10/2025
+
+### doel van de dag
+
+vandaag willen we de gene annotation gaan runnen en kijken wat de verschillende manieren van phasing doen. verder willen wij kijken naar welke genen er betrokken zijn bij de ethanolresistentie en bepalen wat wij met onze uitendelijke output van bcftools csq willen doen.
+
+### motivatie van aanpak
+
+de gene annotation stap van onze pijplijn proberen we nu met verschillende manieren van --phase te runnen, om hiermee proberen goede output te krijgen met zo min mogelijk foutmeldingen. daarnaast moeten wij voor onze eindstap de genen waar onze mutaties zitten kunnen vergelijken met de genen waar iets van alcoholresistentie in gebeurd vergelijken. 
+
+### uitgevoerde werkzaamheden
+
+eerst hebben we vandaag als eerste een taakverdeling gedaan. jasmijn zou bcftools csq opnieuw runnen met andere --phase tweaks en ik en oscar zouden op zoek gaan naar de genen in gist die verantwoordelijk zijn voor alcoholresistentie in gist en of wij alvast een manier van analyse zouden kunnen bedenken voor onze einddata. voor de data van de genen hebben we eerst in het originele onderzoek gekeken. hierin staat dat zij origineel 900 genen hadden gevonden die effect hadden op alcoholresistentie. helaas hadden ze in hun experiment maar een set van de 20 beste genen voor alcoholresistentie en de 20 slechtste genen voor alcoholresistentie gepubliceerd. in overleg met de docent hebben wij ervoor gekozen dat wij dit gaan gebruiken om onze mutaties mee te vergelijken. deze lijst hebben we gedownload en gezet in het mapje /students/2026-2027/Thema05/Groep3/subset/alcoholresistentiegenen.
+
+jasmijn had wat hulp nodig met uitzoeken welke tweaks voor --phase gebruikt moesten worden bij bcftools csq. ik heb haar geholpen met het uitzoeken van deze tweaks. de runs hiervan hebben in het warnings.log bestand niks veranderd en de output van bcftools csq heeft zover wij zien geen data verloren bij het runnen ban bcftools csq. voor verdere details, kijk het logboek van jasmijn. 
+
+tijdens het runnen van de pijplijn is jasmijn er achter gekomen dat wij heel veel adapters nog hebben. dit betekend dat wij eerst ook nog een keer op de subset trimmomatic uit moeten proberen. door middel van het volgende commando hebben wij gevonden dat trimmomatic op het systeem staat:
+
+```{bash eval=FALSE}
+apropos trimmomatic
+```
+
+hieruit kwamen de tools TrimmomaticSE en TrimmomaticPE, voor Single ends en paired ends. wij hebben Single ends en gebruiken dus ook trimmomaticSE voor ons project. 
+
+vandaag was een hectische werkdag, waarin ik constant van de hak op de tak moest springen tussen eigen werkzaamheden en andermans werkzaamheden, waardoor ik niet gefocust op een ding kon werken. ik heb vooral jasmijn geholpen met het uitzoeken van dingen, dus voor verder inzicht naar werkzaamheden refereer ik naar haar logboek. 
+
+### resultaten
+
+we zijn erachter gekomen dat wij nog trimmomatic moeten runnen op onze data en dat wij de output van bcftools csq wel gewoon kunnen vertrouwen
+
+### conclusie en vervolgstappen
+
+wij moeten de pijplijn runnen op de volledige data, maar dan incl trimmomatic.
+
+
+## 7/10/2026  
+
+### doel van de dag
+
+mijn doel van vandaag is om op de geannoteerde data een script te schrijven die de genen vergelijkt met de genen die invloed hebben op alcoholresistentie die de onderzoekers van ons uitgekozen experiment hebben gevonden.
+
+### motivatie van aanpak
+
+in princiepe is dit de laatste stap die bij onze subset nog gedaan moet worden om er zichtbaar resultaat uit te krijgen.
+
+### uitgevoerde werkzaamheden
+
+```{r eval=FALSE}
+library(dplyr)
+
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+jy304_info <- strsplit(jy304$info, ";")
+
+jy304_info_rbind <- do.call(rbind, jy304_info)
+
+head(jy304_info_rbind)
+
+jy304_df <- as.data.frame(jy304_info_rbind)
+
+filtered_jy304 <- select(jy304_df, starts_with("BCSQ="))
+
+filtered_jy304
+```
+
+de code hierboven heb ik vandaag geschreven. helaas heeft onze data een probleem, namelijk dat de lijnen waarin staat op welk gen de mutatie zit op verschillende lijnen in de dataframe/lijst staat. dit zorgt ervoor dat wij eerst moeten filteren op de lijnen die beginnen met "BCSQ" en daarna nog verder kunnen filteren. ik heb vandaag geprobeerd dat te doen, maar dat is mij niet meer gelukt. het schrijven van de code vandaag ging wat stroef.
+
+### resultaten
+
+een beginsel van een r script om de data mee te verwerken
+
+### conclusie en vervolgstappen
+
+het script moet nog afgeschreven worden om een analyse te doen. de eerste stap hierin is alle nuttige data in een dataframe/ op een lijn in een dataframe krijgen.
 
 ## 
+
+### doel van de dag
+
+verder werken met het script voor de analyse 
+
+### motivatie van aanpak
+
+dit is de laatste slag die we moeten slaan op de subset om onze volledige analyse af te maken.
+
+### uitgevoerde werkzaamheden
+
+vandaag ben ik verder gegaan met de code van vorige keer.
+
+```{r eval=FALSE}
+library(dplyr)
+
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+jy304_info <- strsplit(jy304$info, ";")
+
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+jy304_bcsq_split
+```
+
+in plaats van rbind gebruiken ben ik gaan zoeken naar hoe je elementen filtert op waarmee de elementen zelf beginnen. aangezien wij wel een tabel hebben kunnen wij met sapply iets laten doen over alle elementen in de tabel. hierdoor heb ik bij alle lijnen het deel gekregen waar het type mutatie en het gen in zit. eerst hebben wij strsplit geprobeerd, waar alle letters door gesplitst werden. daarna heb ik geprobeerd de lijnen te splitsen met de "split" functie, maar deze gaf ook geen goed resultaat. daarna heb ik in de documentatie van split en strsplit gekeken om daar uit te halen wat er mis gaat. daar heb ik gevonden dat ik strsplit moest runnen met fixed=T. hierdoor is de data goed gesplit op onderdeel. wel zijn er nog NA's aanwezig in de data, waarschijnlijk omdat niet alle varianten goed zijn gegaan bij gene annotation.
+
+verder heb ik vandaag de introductie gemaakt van het logboek en heb ik alle gebruikte tools met versies bij data in het logboek gezet.
+
+### resultaten
+
+de resultaten van vandaag zijn het R-script zoals te zien bij de werkzaamheden van vandaag en de output die dit script geeft, namelijk een gestplitste tabel met daarin de data van de gene annotation, zoals het type mutatie en het gen waar de mutatie heeft plaatsgevonden. 
+
+### conclusie en vervolgstappen
+
+het script van vandaag moet nog verder gemaakt worden. ik wil nog kijken wat ik met de "NA" data ga doen, hoe ik de genen die invloed hebben op alcoholresistentie in R ga inbouwen en de uiteindelijke vergelijking van de genen.
+
+
+## 9/10/2026
+
+### doel van de dag
+
+het R script voor de vergelijking van data af proberen te maken
+
+### motivatie van aanpak
+
+wederom, dit is de laatste stap die voor de subset gedaan moet worden 
+
+### uitgevoerde werkzaamheden
+
+```{r eval=FALSE}
+library(dplyr)
+
+# het inlezen van onze data
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+# het geven van kolomnamen
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+# het splitten van de data van de "info" kolom
+jy304_info <- strsplit(jy304$info, ";")
+
+# deze sapply zorgt er voor dat alle lijnen van de gene annotation (die beginnen met BCSQ) worden opgeslagen
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+# dit commando zorgt ervoor dat de gene annotation lijnen op het "|" teken worden gesplitst
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+jy304_bcsq_split
+
+
+```
+
+de eerste stap die ik wil gaan doen hiermee is de NA's uit de dataset halen, hiervoor probeer ik na.omit:
+
+```{r eval=FALSE}
+na.omit(jy304_bcsq_split)
+```
+
+als ik dit run blijven de NA's in mijn dataset. dit heeft dus geen zin. daarna ben ik gaan zoeken naar andere manieren om de NA's uit de data te halen. eerst ben ik gaan kijken naar manieren om met R te bepalen welke lijnen NA bevatten, waarvoor ik de functie is.na heb gebruikt.
+
+```{r}
+is.na(jy304_bcsq_split)
+```
+
+ik had mijn manier in gedachten, maar na een kort onderonsje met marcel ben ik op de volgende manier gekomen om onze lijst te subsetten
+
+```{r eval=FALSE}
+# dit commando zorgt er voor dat alle mutatietypes in 1 kolom staan
+jy304_bcsq_split_mutation <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 1)
+
+# dit commando zorgt er voor dat alle genen in 1 kolom staan
+jy304_bcsq_split_gene <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 2)
+
+```
+
+van deze twee waardes probeer ik op de volgende manier een dataframe te maken:
+
+```{r}
+jy304_df <- data.frame(jy304_bcsq_split_mutation, jy304_bcsq_split_gene)
+
+jy304_df
+```
+
+dit ging niet helemaal zoals verwacht, dus ik probeer het volgende om wel aparte kolommen te maken van onze data:
+
+```{r}
+jy304_df <- data.frame()
+jy304_df$mutation <- jy304_bcsq_split_mutation
+
+```
+
+helaas geeft dit een foutmelding, dus ik kijk eerst in de documentatie van R. dit geeft mij de volgende commandos:
+
+```{r}
+# eerst rbind ik de geneste lijsten van mijn mutaties naar een dataframe
+jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
+
+# daarna voeg ik de genen toe aan die lijst
+jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+# daarna zet ik de kolomnamen om naar duidelijkere namen. (die van gene was al wel goed, maar die van de mutatie nog niet)
+colnames(jy304_df) <- c("mutation", "gene") 
+
+jy304_df
+```
+
+dit heeft de dataframe succesvol gemaakt! de volgende stap is om de vergelijking klaar te zetten
+
+### resultaten 
+
+de volledige code van vandaag en de dataframe die daaruit komt:
+
+```{r eval=FALSE}
+library(dplyr)
+
+# het inlezen van onze data
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/subset/variant_annotation/variant_annotation_jy304")
+
+# het geven van kolomnamen
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+# het splitten van de data van de "info" kolom
+jy304_info <- strsplit(jy304$info, ";")
+
+# deze sapply zorgt er voor dat alle lijnen van de gene annotation (die beginnen met BCSQ) worden opgeslagen
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+# dit commando zorgt ervoor dat de gene annotation lijnen op het "|" teken worden gesplitst
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+# dit commando zorgt er voor dat alle mutatietypes in 1 kolom staan
+jy304_bcsq_split_mutation <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 1)
+
+# dit commando zorgt er voor dat alle genen in 1 kolom staan
+jy304_bcsq_split_gene <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 2)
+
+# eerst rbind ik de geneste lijsten van mijn mutaties naar een dataframe
+jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
+
+# daarna voeg ik de genen toe aan die lijst
+jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+# daarna zet ik de kolomnamen om naar duidelijkere namen. (die van gene was al wel goed, maar die van de mutatie nog niet)
+colnames(jy304_df) <- c("mutation", "gene") 
+
+jy304_df
+
+
+```
+
+verder heeft oscar de rest van de analysestappen gedaan, dus het vergelijken met de genen die wij hebben gevonden en de genen die volgens het gekozen onderzoek invloed hadden op de alcoholresistentie. hieruit kwam dat geen van onze mutaties in die lijst zit.
+
+### conclusie en vervolgstappen
+
+de afwezigheid van genen die de alcoholresistentie beinvloeden betekend dat wij niet terug hebben gevonden in welke genen de mutaties zitten in de jy304 strain. dit kan meerdere dingen betekenen. het eerste wat dit kan betekenen is dat de alcoholresistentie wordt veroorzaakt in de regio's van het genoom die niet voor exonen coderen. dit betekend dat de mutaties in de intronen of promotorregio's van het genoom kunnen zitten, waardoor de eiwitten die alcoholresistentie beinvloeden vaker tot expressie komen (wat dus voor een hogere alcoholresistentie zorgt). een andere verklaring zou kunnen zijn dat niet alle cellen van de jy304 strain dezelfde mutatie hebben gehad die voor alcoholresistentie zorgt. omdat wij met onze pijplijn ook nog een kwaliteitsfiltering doen, kunnen de mutaties die niet vaak genoeg gevonden zijn weggefilterd zijn. hierdoor zouden wij geen mutaties kunnen vinden. een potentiele derde optie is dat de data van de onderzoekers niet klopt. hier ga ik niet van uit, aangezien het onderzoek peer-reviewed is en de data van het onderzoek online te vinden is. 
+hoe dan ook, wij hebben geen verschil kunnen vinden in de genen. een vervolgonderzoek wat mogelijk wel een antwoord zou kunnen geven is om te kijken naar de expressie van de verschillende genen. hierdoor zou je de mutaties die in promotorregio's of intronen gebeurt zijn niet letterlijk terug kunnen vinden, maar de resultaten van die mutaties wel. 
+
+
+##
 
 ### doel van de dag
 
@@ -209,6 +875,6 @@ na het runnen van dit commando heb ik opnieuw geprobeerd om multiqc aan te roepe
 
 ### uitgevoerde werkzaamheden
 
-### resultaten
+### resultaten 
 
 ### conclusie en vervolgstappen
