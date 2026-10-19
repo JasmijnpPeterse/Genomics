@@ -58,14 +58,14 @@ Ik wil mijn tijd op school nuttig besteden en het downloaden van de data is een 
 Ik heb mijn samenvatting licht aangepast voor de presentatie.  
 Daarna heb ik de SRA‑bestanden gedownload via SRAtools:
 
-```{bash}
+```{bash eval=FALSE}
 prefetch $(</homes/jrjpeterse/Genomics/SRR_Acc_List.txt) --output-directory \
 /students/2026-2027/Thema05/Groep3/SRA
 ```
 
 Daarna heb ik de .sra‑bestanden omgezet naar fastq:
 
-```{bash}
+```{bash eval=FALSE}
 find /students/2026-2027/Thema05/Groep3/SRA -name "*.sra" | \
 parallel 'fasterq-dump -O /students/2026-2027/Thema05/Groep3/fastq/ {}'
 ```
@@ -123,7 +123,7 @@ Oscar heeft de accession list gecorrigeerd.
 
 Daarna hebben we subsets gemaakt met seqtk:
 
-```{bash}
+```{bash eval=FALSE}
 seqtk sample -s 696769 SRR11923111.fastq 100000 > wildtype_prestress.fastq
 seqtk sample -s 696769 SRR11923116.fastq 100000 > jy304_prestress.fastq
 ```
@@ -164,21 +164,21 @@ Onze onderzoeksvraag richt zich op het vinden van genen die mogelijk bijdragen a
 We hebben bcftools isec gebruikt om de varianten te vergelijken.  
 Eerst moesten de VCF‑bestanden ge‑bgzip’t worden:
 
-```{bash}
+```{bash eval=FALSE}
 bgzip jy304_calls.vcf
 bgzip wildtype_calls.vcf
 ```
 
 Daarna hebben we indexbestanden gemaakt:
 
-```{bash}
+```{bash eval=FALSE}
 bcftools index jy304_calls.vcf.gz
 bcftools index wildtype_calls.vcf.gz
 ```
 
 Daarna werkte het subtraction‑commando:
 
-```{bash}
+```{bash eval=FALSE}
 bcftools isec -p subtraction_analysis jy304_calls.vcf.gz wildtype_calls.vcf.gz
 ```
 
@@ -211,7 +211,7 @@ Ik wil dat het voornamelijkste hiervan al is gedaan voordat de vakantie begint
 
 ### Uitgevorede werkzaamheden
 Ik begon vandaag met een taak waarbij ik moest kijken ofdat er minder warnings konden worden gegeven als ik een command run tijdens de bcftools die zegt dat phase moet worden genegeerd. Nu zijn er 7190 warnings, waarvan zeker 6852 te maken hebben met phase problemen. Dus ging ik eerst uitzoeken ofdat we dit konden vermideren. Dit deed ik door op de website van bcftools te zoeken naar commands die bij de --phase horen. Dit stond onder het kopje csq: https://samtools.github.io/bcftools/bcftools.html#csq .
-```{bash}
+```{bash eval=FALSE}
 bcftools csq  --phase m -g ./0000.vcf -o ./variant_annota0tion/variant_annotation_jy304
 
 About: Haplotype-aware consequence caller.
@@ -220,7 +220,7 @@ Usage: bcftools csq [OPTIONS] in.vcf
 `bcftools csq` voorspelt wat het effect van elke mutatie is op de genen. Met `--phase m` geven we aan hoe de tool met phase moet omgaan, `-g` is bedoeld voor het annotatiebestand (gff) en `-o` is het uitvoerbestand. In deze command stond het vcf-bestand (`0000.vcf`) bij `-g` en ontbrak het annotatiebestand, waardoor de tool geen geldige invoer kreeg. Het stukje onder de command is de helptekst die bcftools laat zien als de command niet klopt.
 Deze gaf een error over dat het geen vcf file is. Het probleem was de input die ik geef dat wel is, dus ik dacht dat ik dan misschien -o moest veranderen met -f.
 
-```{bash}
+```{bash eval=FALSE}
 bcftools csq  --phase m -g genomic.gff -f ./variant_annotation/variant_annotation_jy304
 
 About: Haplotype-aware consequence caller.
@@ -230,7 +230,7 @@ Hier heb ik `-o` veranderd in `-f`. Maar `-f` is niet het uitvoerbestand, maar h
 Dit gaf nogsteeds aan dat het geen vcf file is, Dus daar lag het niet aan. Toen dacht ik dat ik het anders had genoemd en dus gaf ik nu wel de juiste naam
 
 
-```{bash} 
+```{bash eval=FALSE} 
  bcftools csq --phase m -f ../GCF_000146045.2_R64_genomic.fna -g ../genomic.gff -o variant_annotation/variant_annotation_jy304.vcf 0000.vcf.gz
 
 [E::hts_open_format] Failed to open file "0000.vcf.gz" : No such file or directory
@@ -239,13 +239,13 @@ Failed to read from 0000.vcf.gz: No such file or directory
 In deze command staan de opties nu op de goede plek: `-f` is het referentiegenoom (`.fna`), `-g` het annotatiebestand (`.gff`), `-o` het uitvoerbestand en als laatste staat het invoerbestand met de mutaties. De `../` betekent dat het bestand één map hoger staat. De foutmelding `No such file or directory` betekent dat bcftools het bestand `0000.vcf.gz` niet kon vinden. Ik gaf hier ook de verkeerde naam mee, want het bestand heet `0000.vcf` en niet `0000.vcf.gz`.
 Toen bleek het dat ik in de verkeerde directory zat.
 
-```{bash}
+```{bash eval=FALSE}
 bcftools csq --phase m -f ../GCF_000146045.2_R64_genomic.fna -g ../genomic.gff -o variant_annotation/variant_annotation_jy304.vcf 0000.vcf
 ```
 Dezelfde command als hiervoor, maar nu met de juiste bestandsnaam (`0000.vcf`).
 Toen gaf het nogsteeds een error waaruit weer kwam geen geldig document. Hieruit bleek dat -g en -f moesten worden omgedraaid, want anderzom las hij het verkeerde bestand in.
 
-```{bash}
+```{bash eval=FALSE}
 bcftools csq --phase m -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
 ```
 Nu stonden `-g` (het annotatiebestand `genomic.gff`) en `-f` (het referentiegenoom `.fna`) in de goede volgorde, en dit werkte. Met `-v 2` bepalen we hoeveel meldingen de tool geeft (verbosity) en met `2> warnings3.log` worden alle warnings in het bestand `warnings3.log` opgeslagen in plaats van op het scherm. Daarna volgen het invoerbestand met de mutaties (`0000.vcf`, uit de map `substraction_analysis`) en `-o` voor het uitvoerbestand.
@@ -254,7 +254,7 @@ Dit gaf geen verbeterd resultaat
 de hoeveelheid regels die phase bevatten zijn er 6852
 
 
-```{bash}
+```{bash eval=FALSE}
 bcftools csq --phase a -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
 ```
 Dezelfde command als hiervoor, maar nu met `--phase a` in plaats van `--phase m`.
@@ -262,7 +262,7 @@ de command a zorgt er voor dat  het genotype (GT) wordt genomen zoals het in het
 
 dit gaf ook geen verbeterd resultaat
 de hoeveelheid regels die phase bevatten bleef 6852
-```{bash}
+```{bash eval=FALSE}
 bcftools csq --phase s -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
 ```
 Dezelfde command als hiervoor, maar nu met `--phase s`. Dit was de laatste optie die we uitprobeerden.
@@ -272,13 +272,13 @@ Daardoor hebben wij besloten dat het niet heel erg van toepassing is om dit aan 
 
 Nadat wij hadden besloten dat het oplossen van de phase warnings niet hoefde, ben ik begonnen met het runnen van onze pipeline op de complete data set wat begon met de tool fastqc
 
-```{bash}
+```{bash eval=FALSE}
 # Wildtype
 fastqc /students/2026-2027/Thema05/Groep3/fastq/SRR11923111.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
 ```
 FastQC controleert de kwaliteit van de reads in een fastq-bestand en maakt hier een rapport van, bijvoorbeeld over de kwaliteitsscores per base en over adaptors die nog in de data zitten. Met `--outdir` geven we aan in welke map de rapporten terecht komen (de map `quality_control`). Dit is het bestand van het wildtype (SRR11923111).
 
-```{bash}
+```{bash eval=FALSE}
 #JY304
 fastqc /students/2026-2027/Thema05/Groep3/fastq/SRR11923116.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
 ```
@@ -302,7 +302,7 @@ Ik hoop dat ik zoveel mogelijk af heb zodat ik niet in de vakantie hoef te werke
 ### Uitgevorede werkzaamheden
 
 Gisteren hebben Oscar en Alexander uitgevonden hoe dat Trimmomatic werkt via de terminal. Dit ga ik nu toepassen op de complete data set 
-```{bash}
+```{bash eval=FALSE}
 TrimmomaticSE -threads 4 fastq/SRR11923116.fastq Genomics/jy304_prestress_trimmed.fastq ILLUMINACLIP:/usr/share/trimmomatic/TruSeq3-SE.fa:2:30:10
 
 TrimmomaticSE -threads 4 fastq/SRR11923111.fastq Genomics/wildtype_prestress_trimmed.fastq ILLUMINACLIP:/usr/share/trimmomatic/TruSeq3-SE.fa:2:30:10
@@ -311,14 +311,14 @@ TrimmomaticSE -threads 4 fastq/SRR11923111.fastq Genomics/wildtype_prestress_tri
 Met TrimmomaticSE worden de adaptors uit de reads verwijderd. De SE staat voor single-end, want onze data bestaat uit enkele reads in plaats van paren. Met `-threads 4` gebruikt de tool 4 processorkernen tegelijk, waardoor het sneller gaat. Daarna volgen eerst het invoerbestand (de ruwe fastq) en dan het uitvoerbestand (de getrimde fastq). `ILLUMINACLIP` is de trimstap, en daarachter staat het bestand met de bekende Illumina-adaptersequenties (`TruSeq3-SE.fa`) gevolgd door drie instellingen: `2` is het aantal mismatches dat is toegestaan bij het zoeken naar een adaptor, `30` is de score-drempel voor een palindroom-match en `10` is de score-drempel voor een gewone match met de adaptor. Dit doen we eerst voor de jy304 en daarna voor het wildtype.
 
 
-```{bash}
+```{bash eval=FALSE}
 mv jy304_prestress_trimmed.fastq trimmed_data/
 mv wildtype_prestress_trimmed.fastq trimmed_data/
 ```
 Met `mv` verplaatsen we de getrimde bestanden naar de map `trimmed_data`, zodat de getrimde data gescheiden blijft van de ruwe data en de rest van de bestanden overzichtelijk blijft.
 
 
-```{bash}
+```{bash eval=FALSE}
 fastqc trimmed_data/jy304_prestress_trimmed.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
 
 fastqc trimmed_data/wildtype_prestress_trimmed.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
@@ -327,12 +327,12 @@ fastqc trimmed_data/wildtype_prestress_trimmed.fastq --outdir /students/2026-202
 Met fastqc controleren we de kwaliteit van de data opnieuw, nu na het trimmen. Met `--outdir` geven we aan in welke map de rapporten terecht komen (de map `quality_control`). Zo kunnen we kijken of het trimmen gelukt is.
 Er is nu geen adaptor error meer
 
-```{bash}
+```{bash eval=FALSE}
 STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress_trimmed.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts
 ```
 STAR is de tool die de reads alignt op het referentiegenoom. Met `--genomeDir` geven we de map aan waarin de genoomindex staat en met `--readFilesIn` de reads die we willen alignen (de getrimde wildtype reads). `--outFileNamePrefix` bepaalt waarmee de namen van alle uitvoerbestanden beginnen. `--outSAMtype BAM SortedByCoordinate` zorgt ervoor dat de uitvoer een BAM-bestand is dat gesorteerd is op positie in het genoom, wat nodig is voor de volgende stappen. `--outSAMattributes Standard` voegt de standaard extra informatie per read toe en `--quantMode GeneCounts` telt hoeveel reads er op elk gen vallen.
 
-```{bash}
+```{bash eval=FALSE}
 EXITING because of FATAL ERROR: could not open genome file GenomeDir//genomeParameters.txt
 SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions
 
@@ -358,7 +358,7 @@ Hopelijk is STAR klaar met runnen en kunnen we verder met de pipeline zodat we m
 Ik wil alleen de puntjes op de i hoeven doen tijdens de lesvrije week.
 ### Uitgevorede werkzaamheden
 We kwamen er achter dat STAR is gecrashed wanwege niet genoeg memory:
-```{bash} 
+```{bash eval=FALSE} 
 EXITING because of fatal ERROR: not enough memory for BAM sorting: 
 SOLUTION: re-run STAR with at least --limitBAMsortRAM 1330572946
 Oct 07 16:13:17 ...... FATAL ERROR, exiting
@@ -367,14 +367,14 @@ STAR stopte tijdens het sorteren van het BAM-bestand, omdat er niet genoeg werkg
 We proberen hem nu eerst opnieuw met threads omdat het kon zijn dat er gisteren meerdere mensen bezig waren
 
 
-```{bash}
+```{bash eval=FALSE}
 STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress_trimmed.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts --runThreadN 8
 ```
 Dit is dezelfde STAR-command als eerst, maar nu met `--runThreadN 8`. Hiermee gebruikt STAR 8 threads tegelijk, wat het alignen een stuk sneller maakt.
 
 We kregen nu opnieuw de foutmelding dat er niet genoeg memory is. Na het bespreken met de docent en onderzoek hebben gedaan zijn we er achter gekomen dat we dit kunnen verkomen met de command --limitBAMsortRAM 1330572946 (ong 1.33 GB RAM)
 
-```{bash}
+```{bash eval=FALSE}
 STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress_trimmed.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts --runThreadN 8 --limitBAMsortRAM 1330572946
 
 
@@ -384,7 +384,7 @@ Nu hebben we `--limitBAMsortRAM 1330572946` toegevoegd. Dit geeft STAR een limie
 
 Nu kregen we gelukkig geen ERROR dus konden we verder 
 
-```{bash}
+```{bash eval=FALSE}
 versie 1.21
 bcftools mpileup -f /students/2026-2027/Thema05/Groep3/Genomics/GCF_000146045.2_R64_genomic.fna -o /students/2026-2027/Thema05/Groep3/Genomics/wildtype_pileup /students/2026-2027/Thema05/Groep3/Genomics/wildtype_prestressAligned.sortedByCoord.out.bam --threads 8
 
@@ -394,7 +394,7 @@ bcftools mpileup -f /students/2026-2027/Thema05/Groep3/Genomics/GCF_000146045.2_
 Met `bcftools mpileup` bekijken we voor elke positie in het genoom welke basen de gealignde reads daar hebben, vergeleken met het referentiegenoom. `-f` is het referentiegenoom (het .fna-bestand), `-o` is het uitvoerbestand en daarna volgt het BAM-bestand van STAR als invoer. `--threads 8` gebruikt 8 threads, en de versie van bcftools die we gebruiken is 1.21. Dit doen we voor zowel het wildtype als de jy304.
 Dit ging ook helemaal goed, en geen errors gekregen
 
-```{bash}
+```{bash eval=FALSE}
 #voor het wildtype
 bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/Genomics/wildtype_calls /students/2026-2027/Thema05/Groep3/Genomics/wildtype_pileup
 
@@ -404,30 +404,30 @@ bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/Genomics/
 ```
 Met `bcftools call` worden uit de pileup de daadwerkelijke varianten (mutaties) gehaald. `-m` gebruikt de multiallelic caller, `-v` zorgt dat alleen de posities worden bewaard waar een variant is gevonden en `-Ov` zet het uitvoerformaat op een niet-gecomprimeerd VCF-bestand. Met `--ploidy 1` geven we aan dat het organisme haploïde is (één kopie van elk chromosoom), zodat elke positie maar één allel krijgt. `-o` is weer het uitvoerbestand.
 
-```{bash}
+```{bash eval=FALSE}
 bgzip wildtype_calls
 bgzip jy304_calls
 ```
 `bgzip` comprimeert de bestanden naar een .gz-formaat waar bcftools mee kan werken. Dit is nodig voordat we de bestanden kunnen indexeren.
 
-```{bash}
+```{bash eval=FALSE}
 bcftools index wildtype_calls.gz
 bcftools index jy304_calls.gz
 ```
 Met `bcftools index` maken we van elk gecomprimeerd bestand een index, zodat bcftools snel bepaalde posities kan opzoeken. Dit is nodig voor de volgende stap, het vergelijken van de twee bestanden.
 
-```{bash}
+```{bash eval=FALSE}
 bcftools isec -p substraction_analysis -i 'QUAL>25 && INFO/DP>20' jy304_calls.gz wildtype_calls.gz
 ```
 `bcftools isec` vergelijkt de twee VCF-bestanden met elkaar (intersection). `-p substraction_analysis` is de map waarin de uitvoer terecht komt. Met `-i 'QUAL>25 && INFO/DP>20'` filteren we op betrouwbare varianten: de kwaliteit (QUAL) moet hoger zijn dan 25 en de read depth (DP) hoger dan 20. In de uitvoermap staat onder andere `0000.vcf`, dit zijn de mutaties die alleen in de eerste file (jy304) zitten en niet in de tweede (wildtype). Dat is precies wat wij willen.
 
-```{bash}
+```{bash eval=FALSE}
 bcftools csq -f GCF_000146045.2_R64_genomic.fna -g genomic.csq.gff ./substraction_analysis/0000.vcf -o variant_annotation_jy304 -v 0 2> warnings.log
 ```
 Met `bcftools csq` voorspellen we wat het effect is van elke mutatie op de genen (bijvoorbeeld of een aminozuur verandert). `-f` is het referentiegenoom, `-g` is het annotatiebestand (gff) met de genen, daarna volgt het bestand met de unieke mutaties (`0000.vcf`) en `-o` is het uitvoerbestand. Met `-v 0` wordt de verbositeit op 0 gezet, dus de tool print niet alle meldingen op het scherm. Met `2> warnings.log` worden de warnings in een apart logbestand opgeslagen in plaats van op het scherm.
 ### Resultaten
 Onze resultaten zijn nu een vcf file die alle mutaties bevat die de jy304 bevat maar de wildtype niet. Dit zijn in totaal 64 mutaties. Dit heb ik gevonden door 
-```{bash}
+```{bash eval=FALSE}
 wc variant_annotation_jy304
 ```
 `wc` (word count) telt het aantal regels, woorden en tekens in een bestand. Het eerste getal in de uitvoer is het aantal regels, en dat gebruiken we om het aantal mutaties te bepalen.
@@ -446,7 +446,7 @@ Ik wil alles af hebben voordat de vakantie begint
 ### Uitgevorede werkzaamheden
 Ik ben begonnen met het opschonen van de map terwijl alexander en oscar verder gaan met de code voor het vergelijken. 
 Ik heb verscillende mappen aangemaakt: STAR_output, bcftools, quality_control en trimmed_data. Dit heb ik gedaan door middel van mkdir en mv
-```{bash}
+```{bash eval=FALSE}
 tree /students/2026-2027/Thema05/Groep3/Genomics
 ```
 Met `mkdir` maak je een nieuwe map aan en met `mv` verplaats je bestanden naar die map, zo heb ik de bestanden per stap van de pipeline gesorteerd. Met `tree` laat je de mapstructuur zien als een boomdiagram, zodat ik kon controleren of alles op de juiste plek terecht is gekomen.
