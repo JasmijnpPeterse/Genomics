@@ -18,8 +18,8 @@ help(fastqc)
 ```{r}
 library(fastqcr)
 
-fastqc(
-  fq.dir = "/students/2026-2027/Thema05/Groep3/subset/jy304_prestress.fastq",
-  qc.dir = "/students/2026-2027/Thema05/Groep3/subset"
-)
+fastqc /students/2026-2027/Thema05/Groep3/subset/wildtype_prestress.fastq --outdir /students/2026-2027/Thema05/Groep3/subset/qc
+
+fastqc /students/2026-2027/Thema05/Groep3/subset/jy304_prestress.fastq --outdir /students/2026-2027/Thema05/Groep3/subset/qc
+
 ```

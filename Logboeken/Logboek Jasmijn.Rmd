@@ -4,83 +4,522 @@ output: html_document
 date: "2026-09-15"
 ---
 
-## ../../..
-### Doel
-### Motivatie
-### Uitgevorede werkzaamheden
-### Resultaten
-### Conclusie
-### Volgende stap
+## Introductie
+Voor dit onderzoek analyseren Alexander, Oscar en ik de data van het artikel "Regulatory and evolutionary adaptation of yeast to acute lethal ethanol stress". In dat onderzoek is vooral transcriptomics gedaan. De onderzoekers hebben de bakkersgiststam *S. cerevisiae* BY4741 10 tot 12 keer gedurende 2 minuten blootgesteld aan 24,5% ethanol. Hierdoor stierven veel cellen, waardoor vooral cellen overbleven met genen die hen resistenter maakten tegen alcohol, zonder dat dit ten koste ging van de groeisnelheid. Zo ontstond de stam jy304. Na één ronde ethanol overleeft ongeveer 35% van de jy304-cellen, tegenover 1% van de oorspronkelijke stam.
 
-# Logboek Jasmijn
-## 13/09/2026 
-### Doel: 
-Samenvatten van ons gekozen artikel over hoe gist reageert op ethanol stress.
-(https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528) 
-### Motivatie: 
+Op basis van dit onderzoek hebben wij een genomics-onderzoek uitgevoerd. Wij wilden nagaan of de opgetreden mutaties daadwerkelijk bijdragen aan alcoholresistentie. Hiervoor hebben we de data getrimd, gemapt, varianten bepaald (variant calling) en de genen geannoteerd (gene annotation).
+
+## Data
+De data voor ons onderzoek komt uit het artikel zelf: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528. We gebruiken echter niet alle data van de onderzoekers. Wij vergelijken alleen de pre-stress-samples van het wildtype (SRR11923111) en van jy304 (SRR11923116). Deze hebben we gedownload via https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA637242&o=acc_s%3Aa. Daarnaast hebben we een referentiegenoom gebruikt voor het mappen en een gff-bestand voor de annotatie met BCFtools. Beide komen van https://ncbi.nlm.nih.gov/datasets/genome/GCF_000146045.2/.
+
+## Tools
+Voor ons onderzoek hebben we verschillende tools gebruikt. Hieronder staan de versies die we hebben gebruikt. Van BCFtools hebben we twee versies gebruikt: versie 1.23 voor de subset en versie 1.21 voor de volledige dataset. Op het Assemblix-cluster stond versie 1.21 al geïnstalleerd en wij wilden die niet updaten.
+
+- FastQC: v0.12.1
+- Trimmomatic: v0.39
+- STAR: v2.7.11b
+- bgzip: v1.18
+- BCFtools (subset): v1.23
+- BCFtools (volledige dataset): v1.21
+
+---
+
+## 13/09/2026
+### Doel van de dag
+Het maken van een duidelijke en inhoudelijke samenvatting van het gekozen artikel over ethanolstress in gist (https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239528) 
+
+
+### Motivatie
 Dinsdag is de presentatie dus ik maak het liever vandaag al zodat ik het niet last minute hoef te doen, en zodat ik minder stress heb
-### Uitgevoerde werkzaamheden: 
-De samenvatting
-### Resultaten 
-Mijn samenvatting (https://docs.google.com/document/d/1k2wYKrGZMdxGFDWmonYJuurFLbNxj8qxIpaRrhwoJ_w/edit?usp=sharing)
+
+### Uitgevoerde werkzaamheden
+Ik heb het volledige artikel gelezen en een uitgebreide samenvatting geschreven. Deze staat in Google Docs zodat mijn groepsleden deze kunnen bekijken.
+
+### Resultaten
+De samenvatting is af en staat hier:  
+https://docs.google.com/document/d/1k2wYKrGZMdxGFDWmonYJuurFLbNxj8qxIpaRrhwoJ_w/edit?usp=sharing
+
 ### Conclusie
-Duurde even, maar was een erg interresant artikel om te lezen
-### Volgende stap: 
-Het presenteren van de samenvatting
+Het artikel was interessant en leerzaam. Het kostte wat tijd om alle details te begrijpen, maar het gaf een goed beeld van gistreacties op ethanolstress.
+
+### Volgende stap
+De samenvatting presenteren tijdens de plan‑van‑aanpak presentatie.
+
+---
 
 ## 14/09/2026
-### Doel
-Ik begon de dag zonder doel maar tijdens de dag was het om de data te downloaden
+### Doel van de dag
+Aan het begin van de dag had ik nog geen concreet doel, maar tijdens de les werd duidelijk dat we onze RNA‑seq data moesten downloaden.
+
 ### Motivatie
-Ik ben op school dus ik wil er niet voor niets zitten
-### Uitgevorede werkzaamheden
-Ik heb voor de presentatie mijn samenvatting een beetje aangepast waardoor het iets soepeler te vertellen is. Ook heb ik een code geschreven om onze data te downloaden
-```{bash SRA_download, eval=FALSE}
+Ik wil mijn tijd op school nuttig besteden en het downloaden van de data is een noodzakelijke stap voor de pijplijn.
+
+### Uitgevoerde werkzaamheden
+Ik heb mijn samenvatting licht aangepast voor de presentatie.  
+Daarna heb ik de SRA‑bestanden gedownload via SRAtools:
+
+```{bash}
 prefetch $(</homes/jrjpeterse/Genomics/SRR_Acc_List.txt) --output-directory \
 /students/2026-2027/Thema05/Groep3/SRA
 ```
 
-```{bash extract_fastq, eval=FALSE}
+Daarna heb ik de .sra‑bestanden omgezet naar fastq:
+
+```{bash}
 find /students/2026-2027/Thema05/Groep3/SRA -name "*.sra" | \
 parallel 'fasterq-dump -O /students/2026-2027/Thema05/Groep3/fastq/ {}'
 ```
-### Resultaten
-Het downloaden is gelukt, en staat netjes in de map. 
-### Conclusie
-Nu dat onze data is gedownload kunnen we verder met ons project.
-### Volgende stap
-De presentatie morgen geven en bedenken hoe we de code willen schrijven.
 
-## 15/09/2026
-### Doel
-Een nette presentatie geven
-### Motivatie
-Ik wil het jaar goed beginnen.
-### Uitgevorede werkzaamheden
-We hebben de presentatie gegeven
 ### Resultaten
-De presentatie ging prima, had wel beter gekund.Ik vergat mijn hele samenvatting waardoor ik moeite had met het presenteren. De feedback hebben we nog niet binnen.
+Alle fastq‑bestanden zijn succesvol gedownload en staan in:  
+`/students/2026-2027/Thema05/Groep3/fastq`
+
 ### Conclusie
-Ik had beter mijn samenvatting moeten leren, zodat dit niet had kunnen gebeuren
+De data is succesvol gedownload en staat klaar voor verdere verwerking.
+
 ### Volgende stap
-De volgende les gaat we het genoom van de gist downloaden en een begin maken in het progameren.
+De presentatie geven en nadenken over hoe we de code voor de pijplijn gaan schrijven.
+
+---
 
 ## 16/09/2026
 ### Doel
+Subset maken
+
 ### Motivatie
+Zodat we door kunnen met de quality control
+
 ### Uitgevorede werkzaamheden
+Uiteindelijk hebben we niet aan het project kunnen werken, dit was omdat we uitleg kregen over de statistiek achter R.
+
 ### Resultaten
+Geen resultaten vandaag
+
 ### Conclusie
+We hadden dit gisteren al moeten doen.
+
 ### Volgende stap
+De subset maken en daarna de quality control.
+
+
+---
 
 ## 21/09/2026
 ### Doel
+De subset af hebben en hopelijk de quality control ook.
+
 ### Motivatie
+Ik hoop dat we dit snel af hebben zodat we door kunnen met de opdrachten bij week 3.
+
 ### Uitgevorede werkzaamheden
-Achter gekomen sample assecion list verkeerd gedownload
-alle behalve ..11 en ...16 verwijderen
-jrjpeterse@assemblix2019:/students/2026-2027/Thema05/Groep3/fastq$ seqtk sample -s 696769 SRR11923116.fastq 100000 > Jy304_prestress.fastq
+Tijdens het maken van de subset kwamen we erachter dat er iets mis was gegaan bij het downloaden van de data.  
+Ik had de pre‑stress varianten geselecteerd, maar niet op “selected” geklikt, waardoor alle datasets waren gedownload.
+
+We hebben alle fastq‑bestanden verwijderd behalve de pre‑stress bestanden:  
+- SRR11923111.fastq  
+- SRR11923116.fastq  
+
+Oscar heeft de accession list gecorrigeerd.
+
+Daarna hebben we subsets gemaakt met seqtk:
+
+```{bash}
+seqtk sample -s 696769 SRR11923111.fastq 100000 > wildtype_prestress.fastq
+seqtk sample -s 696769 SRR11923116.fastq 100000 > jy304_prestress.fastq
+```
+
+Daarna hebben we FastQC uitgevoerd. Tijdens het runnen kregen we een Java‑foutmelding, maar dit bleek niet relevant.
+
+Uit de QC kwamen drie waarschuwingen:
+
+1. **Per base sequence quality**  
+   Een kwart van de data heeft een kwaliteit <10 of de median <25.
+
+2. **Per base sequence content**  
+   >10% verschil tussen A/T of C/G op bepaalde posities, waarschijnlijk door hexamer‑bias in RNA‑seq.
+
+3. **Overrepresented sequences**  
+   >0.1% van alle reads is identiek, typisch voor kleine RNA‑libraries.
+
 ### Resultaten
+De subsets zijn gemaakt en de QC is uitgevoerd.
+
 ### Conclusie
+De data bevat enkele waarschuwingen, maar is bruikbaar voor verdere analyse.
+
 ### Volgende stap
+Mapping uitvoeren met STAR en daarna variant calling.
+
+
+---
+
+## 28/09/2026
+### Doel van de dag
+Het uitvoeren van een subtraction analysis op de variant calling resultaten van de wildtype gist en de JY304‑strain.
+
+### Motivatie
+Onze onderzoeksvraag richt zich op het vinden van genen die mogelijk bijdragen aan ethanolresistentie. Door varianten te vergelijken kunnen we mutaties identificeren die uniek zijn voor JY304.
+
+### Uitgevoerde werkzaamheden
+We hebben bcftools isec gebruikt om de varianten te vergelijken.  
+Eerst moesten de VCF‑bestanden ge‑bgzip’t worden:
+
+```{bash}
+bgzip jy304_calls.vcf
+bgzip wildtype_calls.vcf
+```
+
+Daarna hebben we indexbestanden gemaakt:
+
+```{bash}
+bcftools index jy304_calls.vcf.gz
+bcftools index wildtype_calls.vcf.gz
+```
+
+Daarna werkte het subtraction‑commando:
+
+```{bash}
+bcftools isec -p subtraction_analysis jy304_calls.vcf.gz wildtype_calls.vcf.gz
+```
+
+Dit genereerde:
+
+- **0000.vcf** — mutaties uniek voor JY304  
+- **0001.vcf** — mutaties uniek voor wildtype  
+- **0002.vcf** — gedeelde mutaties (JY304 als referentie)  
+- **0003.vcf** — gedeelde mutaties (wildtype als referentie)  
+- **sites.txt** — gedeelde posities
+
+### Resultaten
+We hebben nu een volledige subtractie van de varianten tussen beide stammen. De bestanden geven precies welke mutaties uniek zijn voor JY304.
+
+### Conclusie
+De subtraction analysis is succesvol uitgevoerd. Dit vormt de basis voor het koppelen van mutaties aan genen.
+
+### Volgende stap
+De mutaties koppelen aan genen via het S288C‑genoom en de annotaties.
+
+---
+
+## 05/10/2026
+
+### Doel
+Beginnen met het toepassen van alle stappen op de complete dataset
+
+### Motivatie
+Ik wil dat het voornamelijkste hiervan al is gedaan voordat de vakantie begint
+
+### Uitgevorede werkzaamheden
+Ik begon vandaag met een taak waarbij ik moest kijken ofdat er minder warnings konden worden gegeven als ik een command run tijdens de bcftools die zegt dat phase moet worden genegeerd. Nu zijn er 7190 warnings, waarvan zeker 6852 te maken hebben met phase problemen. Dus ging ik eerst uitzoeken ofdat we dit konden vermideren. Dit deed ik door op de website van bcftools te zoeken naar commands die bij de --phase horen. Dit stond onder het kopje csq: https://samtools.github.io/bcftools/bcftools.html#csq .
+```{bash}
+bcftools csq  --phase m -g ./0000.vcf -o ./variant_annota0tion/variant_annotation_jy304
+
+About: Haplotype-aware consequence caller.
+Usage: bcftools csq [OPTIONS] in.vcf
+```
+`bcftools csq` voorspelt wat het effect van elke mutatie is op de genen. Met `--phase m` geven we aan hoe de tool met phase moet omgaan, `-g` is bedoeld voor het annotatiebestand (gff) en `-o` is het uitvoerbestand. In deze command stond het vcf-bestand (`0000.vcf`) bij `-g` en ontbrak het annotatiebestand, waardoor de tool geen geldige invoer kreeg. Het stukje onder de command is de helptekst die bcftools laat zien als de command niet klopt.
+Deze gaf een error over dat het geen vcf file is. Het probleem was de input die ik geef dat wel is, dus ik dacht dat ik dan misschien -o moest veranderen met -f.
+
+```{bash}
+bcftools csq  --phase m -g genomic.gff -f ./variant_annotation/variant_annotation_jy304
+
+About: Haplotype-aware consequence caller.
+Usage: bcftools csq [OPTIONS] in.vcf
+```
+Hier heb ik `-o` veranderd in `-f`. Maar `-f` is niet het uitvoerbestand, maar het referentiegenoom (fasta-bestand). Daarnaast gaf ik nog steeds geen vcf-bestand als invoer mee, waardoor bcftools weer de helptekst liet zien.
+Dit gaf nogsteeds aan dat het geen vcf file is, Dus daar lag het niet aan. Toen dacht ik dat ik het anders had genoemd en dus gaf ik nu wel de juiste naam
+
+
+```{bash} 
+ bcftools csq --phase m -f ../GCF_000146045.2_R64_genomic.fna -g ../genomic.gff -o variant_annotation/variant_annotation_jy304.vcf 0000.vcf.gz
+
+[E::hts_open_format] Failed to open file "0000.vcf.gz" : No such file or directory
+Failed to read from 0000.vcf.gz: No such file or directory
+```
+In deze command staan de opties nu op de goede plek: `-f` is het referentiegenoom (`.fna`), `-g` het annotatiebestand (`.gff`), `-o` het uitvoerbestand en als laatste staat het invoerbestand met de mutaties. De `../` betekent dat het bestand één map hoger staat. De foutmelding `No such file or directory` betekent dat bcftools het bestand `0000.vcf.gz` niet kon vinden. Ik gaf hier ook de verkeerde naam mee, want het bestand heet `0000.vcf` en niet `0000.vcf.gz`.
+Toen bleek het dat ik in de verkeerde directory zat.
+
+```{bash}
+bcftools csq --phase m -f ../GCF_000146045.2_R64_genomic.fna -g ../genomic.gff -o variant_annotation/variant_annotation_jy304.vcf 0000.vcf
+```
+Dezelfde command als hiervoor, maar nu met de juiste bestandsnaam (`0000.vcf`).
+Toen gaf het nogsteeds een error waaruit weer kwam geen geldig document. Hieruit bleek dat -g en -f moesten worden omgedraaid, want anderzom las hij het verkeerde bestand in.
+
+```{bash}
+bcftools csq --phase m -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
+```
+Nu stonden `-g` (het annotatiebestand `genomic.gff`) en `-f` (het referentiegenoom `.fna`) in de goede volgorde, en dit werkte. Met `-v 2` bepalen we hoeveel meldingen de tool geeft (verbosity) en met `2> warnings3.log` worden alle warnings in het bestand `warnings3.log` opgeslagen in plaats van op het scherm. Daarna volgen het invoerbestand met de mutaties (`0000.vcf`, uit de map `substraction_analysis`) en `-o` voor het uitvoerbestand.
+De command m zorgt ervoor dat alle genotypes worden samengevoegd tot één enkel haplotype, waarbij heterozygote posities worden behandeld alsof ze één niet‑referentie‑allel hebben (0/1 → 1).
+Dit gaf geen verbeterd resultaat
+de hoeveelheid regels die phase bevatten zijn er 6852
+
+
+```{bash}
+bcftools csq --phase a -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
+```
+Dezelfde command als hiervoor, maar nu met `--phase a` in plaats van `--phase m`.
+de command a zorgt er voor dat  het genotype (GT) wordt genomen zoals het in het VCF staat en forceert het in een gefaseerde vorm, zelfs als er geen echte fase-informatie aanwezig is.
+
+dit gaf ook geen verbeterd resultaat
+de hoeveelheid regels die phase bevatten bleef 6852
+```{bash}
+bcftools csq --phase s -g genomic.gff -f ./GCF_000146045.2_R64_genomic.fna -v 2 2> warnings3.log ./variant_calls/substraction_analysis/0000.vcf -o variant_annotation_jy304_1
+```
+Dezelfde command als hiervoor, maar nu met `--phase s`. Dit was de laatste optie die we uitprobeerden.
+De command s zorgt ervoor dat posities met een niet-gefaseerd heterozygoot genotype worden overgeslagen.
+Maar ook hier kwam geen verbeterd resultaat uit.
+Daardoor hebben wij besloten dat het niet heel erg van toepassing is om dit aan te verbeteren aangezien dit geen aanzienelijk effect heeft op onze data
+
+Nadat wij hadden besloten dat het oplossen van de phase warnings niet hoefde, ben ik begonnen met het runnen van onze pipeline op de complete data set wat begon met de tool fastqc
+
+```{bash}
+# Wildtype
+fastqc /students/2026-2027/Thema05/Groep3/fastq/SRR11923111.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+```
+FastQC controleert de kwaliteit van de reads in een fastq-bestand en maakt hier een rapport van, bijvoorbeeld over de kwaliteitsscores per base en over adaptors die nog in de data zitten. Met `--outdir` geven we aan in welke map de rapporten terecht komen (de map `quality_control`). Dit is het bestand van het wildtype (SRR11923111).
+
+```{bash}
+#JY304
+fastqc /students/2026-2027/Thema05/Groep3/fastq/SRR11923116.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+```
+Dezelfde fastqc-command, maar nu voor de jy304 strain (SRR11923116).
+Uit de fastqc kwam dat er een grote hoeveelheid van adaptors nog in de data zat.
+
+### Resultaten
+Onze resultaten zijn de bestanden met de quality control. Onze data is in het algemeen best netjes, naast de adaptors na
+### Conclusie
+Wij moeten de adaptors nog uit onze data gaan halen door middel van trimmomatic.
+### Volgende stap
+Het runnen van trimmomatic op de data set, en dan met de nettere data de rest van de pipeline runnen
+
+---
+
+## 07/10/2026
+### Doel
+De trimmomatic uitvoeren op de complete dataset en dan verder met star
+### Motivatie
+Ik hoop dat ik zoveel mogelijk af heb zodat ik niet in de vakantie hoef te werken.
+### Uitgevorede werkzaamheden
+
+Gisteren hebben Oscar en Alexander uitgevonden hoe dat Trimmomatic werkt via de terminal. Dit ga ik nu toepassen op de complete data set 
+```{bash}
+TrimmomaticSE -threads 4 fastq/SRR11923116.fastq Genomics/jy304_prestress_trimmed.fastq ILLUMINACLIP:/usr/share/trimmomatic/TruSeq3-SE.fa:2:30:10
+
+TrimmomaticSE -threads 4 fastq/SRR11923111.fastq Genomics/wildtype_prestress_trimmed.fastq ILLUMINACLIP:/usr/share/trimmomatic/TruSeq3-SE.fa:2:30:10
+
+```
+Met TrimmomaticSE worden de adaptors uit de reads verwijderd. De SE staat voor single-end, want onze data bestaat uit enkele reads in plaats van paren. Met `-threads 4` gebruikt de tool 4 processorkernen tegelijk, waardoor het sneller gaat. Daarna volgen eerst het invoerbestand (de ruwe fastq) en dan het uitvoerbestand (de getrimde fastq). `ILLUMINACLIP` is de trimstap, en daarachter staat het bestand met de bekende Illumina-adaptersequenties (`TruSeq3-SE.fa`) gevolgd door drie instellingen: `2` is het aantal mismatches dat is toegestaan bij het zoeken naar een adaptor, `30` is de score-drempel voor een palindroom-match en `10` is de score-drempel voor een gewone match met de adaptor. Dit doen we eerst voor de jy304 en daarna voor het wildtype.
+
+
+```{bash}
+mv jy304_prestress_trimmed.fastq trimmed_data/
+mv wildtype_prestress_trimmed.fastq trimmed_data/
+```
+Met `mv` verplaatsen we de getrimde bestanden naar de map `trimmed_data`, zodat de getrimde data gescheiden blijft van de ruwe data en de rest van de bestanden overzichtelijk blijft.
+
+
+```{bash}
+fastqc trimmed_data/jy304_prestress_trimmed.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+
+fastqc trimmed_data/wildtype_prestress_trimmed.fastq --outdir /students/2026-2027/Thema05/Groep3/Genomics/quality_control
+
+```
+Met fastqc controleren we de kwaliteit van de data opnieuw, nu na het trimmen. Met `--outdir` geven we aan in welke map de rapporten terecht komen (de map `quality_control`). Zo kunnen we kijken of het trimmen gelukt is.
+Er is nu geen adaptor error meer
+
+```{bash}
+STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress_trimmed.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts
+```
+STAR is de tool die de reads alignt op het referentiegenoom. Met `--genomeDir` geven we de map aan waarin de genoomindex staat en met `--readFilesIn` de reads die we willen alignen (de getrimde wildtype reads). `--outFileNamePrefix` bepaalt waarmee de namen van alle uitvoerbestanden beginnen. `--outSAMtype BAM SortedByCoordinate` zorgt ervoor dat de uitvoer een BAM-bestand is dat gesorteerd is op positie in het genoom, wat nodig is voor de volgende stappen. `--outSAMattributes Standard` voegt de standaard extra informatie per read toe en `--quantMode GeneCounts` telt hoeveel reads er op elk gen vallen.
+
+```{bash}
+EXITING because of FATAL ERROR: could not open genome file GenomeDir//genomeParameters.txt
+SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions
+
+Oct 07 13:53:07 ...... FATAL ERROR, exiting
+```
+Dit is de foutmelding die STAR gaf. STAR kon het bestand `genomeParameters.txt` in de genoomindex niet openen. Dit betekend dat ik geen rechten heb tot de documenten dus dit heeft alexander mij gegeven door `chmod map 777`
+
+Daarna heb ik de code zoals hierboven opnieuw gerund en heeft het wel gerund.
+
+### Resultaten
+We hebben nu nog geed directe resultaten omdat STAR nog aan het runnen is.
+### Conclusie
+We hadden eigenlijk met threads moeten runnen, dit zou hebben gezorgd dat het sneller klaar was.
+### Volgende stap
+Morgen gaan we weer verder met pipeline en dit is bcftools
+
+---
+
+## 08/10/2026
+### Doel
+Hopelijk is STAR klaar met runnen en kunnen we verder met de pipeline zodat we morgen kunnen gaan afronden
+### Motivatie
+Ik wil alleen de puntjes op de i hoeven doen tijdens de lesvrije week.
+### Uitgevorede werkzaamheden
+We kwamen er achter dat STAR is gecrashed wanwege niet genoeg memory:
+```{bash} 
+EXITING because of fatal ERROR: not enough memory for BAM sorting: 
+SOLUTION: re-run STAR with at least --limitBAMsortRAM 1330572946
+Oct 07 16:13:17 ...... FATAL ERROR, exiting
+```
+STAR stopte tijdens het sorteren van het BAM-bestand, omdat er niet genoeg werkgeheugen (RAM) beschikbaar was. In de foutmelding staat ook de oplossing: STAR opnieuw runnen met minimaal `--limitBAMsortRAM 1330572946`.
+We proberen hem nu eerst opnieuw met threads omdat het kon zijn dat er gisteren meerdere mensen bezig waren
+
+
+```{bash}
+STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress_trimmed.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts --runThreadN 8
+```
+Dit is dezelfde STAR-command als eerst, maar nu met `--runThreadN 8`. Hiermee gebruikt STAR 8 threads tegelijk, wat het alignen een stuk sneller maakt.
+
+We kregen nu opnieuw de foutmelding dat er niet genoeg memory is. Na het bespreken met de docent en onderzoek hebben gedaan zijn we er achter gekomen dat we dit kunnen verkomen met de command --limitBAMsortRAM 1330572946 (ong 1.33 GB RAM)
+
+```{bash}
+STAR --genomeDir GenomeDir --readFilesIn wildtype_prestress_trimmed.fastq --outFileNamePrefix wildtype_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts --runThreadN 8 --limitBAMsortRAM 1330572946
+
+
+STAR --genomeDir GenomeDir --readFilesIn jy304_prestress_trimmed.fastq --outFileNamePrefix jy304_prestress --outSAMtype BAM SortedByCoordinate --outSAMattributes Standard --quantMode GeneCounts --runThreadN 8 --limitBAMsortRAM 1330572946
+```
+Nu hebben we `--limitBAMsortRAM 1330572946` toegevoegd. Dit geeft STAR een limiet van ongeveer 1.33 GB RAM voor het sorteren van het BAM-bestand, precies het minimum dat de foutmelding aangaf. Met deze command hebben we eerst het wildtype en daarna de jy304 gealignd.
+
+Nu kregen we gelukkig geen ERROR dus konden we verder 
+
+```{bash}
+versie 1.21
+bcftools mpileup -f /students/2026-2027/Thema05/Groep3/Genomics/GCF_000146045.2_R64_genomic.fna -o /students/2026-2027/Thema05/Groep3/Genomics/wildtype_pileup /students/2026-2027/Thema05/Groep3/Genomics/wildtype_prestressAligned.sortedByCoord.out.bam --threads 8
+
+bcftools mpileup -f /students/2026-2027/Thema05/Groep3/Genomics/GCF_000146045.2_R64_genomic.fna -o /students/2026-2027/Thema05/Groep3/Genomics/jy304_pileup /students/2026-2027/Thema05/Groep3/Genomics/jy304_prestressAligned.sortedByCoord.out.bam --threads 8
+
+```
+Met `bcftools mpileup` bekijken we voor elke positie in het genoom welke basen de gealignde reads daar hebben, vergeleken met het referentiegenoom. `-f` is het referentiegenoom (het .fna-bestand), `-o` is het uitvoerbestand en daarna volgt het BAM-bestand van STAR als invoer. `--threads 8` gebruikt 8 threads, en de versie van bcftools die we gebruiken is 1.21. Dit doen we voor zowel het wildtype als de jy304.
+Dit ging ook helemaal goed, en geen errors gekregen
+
+```{bash}
+#voor het wildtype
+bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/Genomics/wildtype_calls /students/2026-2027/Thema05/Groep3/Genomics/wildtype_pileup
+
+#voor de jy304 strain
+bcftools call -mv -Ov --ploidy 1 -o /students/2026-2027/Thema05/Groep3/Genomics/jy304_calls /students/2026-2027/Thema05/Groep3/Genomics/jy304_pileup
+
+```
+Met `bcftools call` worden uit de pileup de daadwerkelijke varianten (mutaties) gehaald. `-m` gebruikt de multiallelic caller, `-v` zorgt dat alleen de posities worden bewaard waar een variant is gevonden en `-Ov` zet het uitvoerformaat op een niet-gecomprimeerd VCF-bestand. Met `--ploidy 1` geven we aan dat het organisme haploïde is (één kopie van elk chromosoom), zodat elke positie maar één allel krijgt. `-o` is weer het uitvoerbestand.
+
+```{bash}
+bgzip wildtype_calls
+bgzip jy304_calls
+```
+`bgzip` comprimeert de bestanden naar een .gz-formaat waar bcftools mee kan werken. Dit is nodig voordat we de bestanden kunnen indexeren.
+
+```{bash}
+bcftools index wildtype_calls.gz
+bcftools index jy304_calls.gz
+```
+Met `bcftools index` maken we van elk gecomprimeerd bestand een index, zodat bcftools snel bepaalde posities kan opzoeken. Dit is nodig voor de volgende stap, het vergelijken van de twee bestanden.
+
+```{bash}
+bcftools isec -p substraction_analysis -i 'QUAL>25 && INFO/DP>20' jy304_calls.gz wildtype_calls.gz
+```
+`bcftools isec` vergelijkt de twee VCF-bestanden met elkaar (intersection). `-p substraction_analysis` is de map waarin de uitvoer terecht komt. Met `-i 'QUAL>25 && INFO/DP>20'` filteren we op betrouwbare varianten: de kwaliteit (QUAL) moet hoger zijn dan 25 en de read depth (DP) hoger dan 20. In de uitvoermap staat onder andere `0000.vcf`, dit zijn de mutaties die alleen in de eerste file (jy304) zitten en niet in de tweede (wildtype). Dat is precies wat wij willen.
+
+```{bash}
+bcftools csq -f GCF_000146045.2_R64_genomic.fna -g genomic.csq.gff ./substraction_analysis/0000.vcf -o variant_annotation_jy304 -v 0 2> warnings.log
+```
+Met `bcftools csq` voorspellen we wat het effect is van elke mutatie op de genen (bijvoorbeeld of een aminozuur verandert). `-f` is het referentiegenoom, `-g` is het annotatiebestand (gff) met de genen, daarna volgt het bestand met de unieke mutaties (`0000.vcf`) en `-o` is het uitvoerbestand. Met `-v 0` wordt de verbositeit op 0 gezet, dus de tool print niet alle meldingen op het scherm. Met `2> warnings.log` worden de warnings in een apart logbestand opgeslagen in plaats van op het scherm.
+### Resultaten
+Onze resultaten zijn nu een vcf file die alle mutaties bevat die de jy304 bevat maar de wildtype niet. Dit zijn in totaal 64 mutaties. Dit heb ik gevonden door 
+```{bash}
+wc variant_annotation_jy304
+```
+`wc` (word count) telt het aantal regels, woorden en tekens in een bestand. Het eerste getal in de uitvoer is het aantal regels, en dat gebruiken we om het aantal mutaties te bepalen.
+### Conclusie
+Wij hebben nu een bestand met alle unieke mutaties, dus deze 64 mutaties zouden mogelijk kunnen zorgen voor alcohol resistentie
+### Volgende stap
+Nu moeten wij een document van het artikel met 20 genen met negatief effect op alohol en 20 genen met een positief effect op alcohol vergelijken om te zien welke van deze 64 mutaties op deze genen liggen.
+
+---
+
+## 09/10/2026
+### Doel
+Het output bestand van gisteren vergelijken met de genen die het artikel vrij geeft om te kijken welke mutaties belangrijk zijn voor ons. En de map een beetje opruimen
+### Motivatie
+Ik wil alles af hebben voordat de vakantie begint
+### Uitgevorede werkzaamheden
+Ik ben begonnen met het opschonen van de map terwijl alexander en oscar verder gaan met de code voor het vergelijken. 
+Ik heb verscillende mappen aangemaakt: STAR_output, bcftools, quality_control en trimmed_data. Dit heb ik gedaan door middel van mkdir en mv
+```{bash}
+tree /students/2026-2027/Thema05/Groep3/Genomics
+```
+Met `mkdir` maak je een nieuwe map aan en met `mv` verplaats je bestanden naar die map, zo heb ik de bestanden per stap van de pipeline gesorteerd. Met `tree` laat je de mapstructuur zien als een boomdiagram, zodat ik kon controleren of alles op de juiste plek terecht is gekomen.
+
+Alexander en Oscar hebben de code uitgevogeld voor de subset, dus nu ga ik hem runnen op de complete data set
+```{r}
+install.packages("dplyr")
+```
+Hiermee wordt het R-package `dplyr` geïnstalleerd. Dit package bevat functies voor het bewerken van data frames. Dit hoeft maar één keer gedaan te worden per computer of server.
+
+```{r}
+library(dplyr)
+
+# het inlezen van onze data
+jy304 <- read.table("/students/2026-2027/Thema05/Groep3/Genomics/variant_annotation_jy304")
+
+# het geven van kolomnamen
+colnames(jy304) <- c("chrom", "pos","id","ref", "alt","qual","filter","info")
+
+# het splitten van de data van de "info" kolom
+jy304_info <- strsplit(jy304$info, ";")
+
+# deze sapply zorgt er voor dat alle lijnen van de gene annotation (die beginnen met BCSQ) worden opgeslagen
+jy304_bcsq <- sapply(jy304_info, function(row) {
+  bcsq <- row[startsWith(row, "BCSQ=")]
+  bcsq[1]
+  })
+
+# dit commando zorgt ervoor dat de gene annotation lijnen op het "|" teken worden gesplitst
+jy304_bcsq_split <- strsplit(jy304_bcsq, "|", fixed=T)
+
+# dit commando zorgt er voor dat alle mutatietypes in 1 kolom staan
+jy304_bcsq_split_mutation <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 1)
+
+# dit commando zorgt er voor dat alle genen in 1 kolom staan
+jy304_bcsq_split_gene <- lapply(jy304_bcsq_split[which(lapply(jy304_bcsq_split, length) >1)], `[[`, 2)
+
+jy304_df <- data.frame(do.call(rbind.data.frame, jy304_bcsq_split_mutation))
+
+jy304_df$gene <- do.call(rbind, jy304_bcsq_split_gene)
+
+colnames(jy304_df) <- c("mutation", "gene")
+
+genen_onderzoek <- read.table("/students/2026-2027/Thema05/Groep3/Genomics/alcoholgenen/pone.0239528.Table2.csv", header = TRUE, sep = ";")
+genen_onderzoek
+intersect(jy304_df$gene, genen_onderzoek$Gene_name)
+intersect(jy304_df$gene, genen_onderzoek$Systematic_Name)
+
+```
+Dit script haalt uit het csq-bestand van de jy304 de mutaties en de genen waar ze in liggen, en vergelijkt die met de genen uit het artikel. Stap voor stap:
+
+- `library(dplyr)` laadt het package dat we hebben geïnstalleerd, zodat de functies van `dplyr` gebruikt kunnen worden.
+- `read.table(...)` leest het bestand met de geannoteerde mutaties in als een data frame. De regels van de VCF-header beginnen met een `#`, die slaat `read.table` standaard over als commentaar.
+- Met `colnames(jy304) <- c(...)` geven we de acht kolommen de namen die bij een VCF horen (chromosoom, positie, id, referentie-allel, alternatief allel, kwaliteit, filter en info).
+- `strsplit(jy304$info, ";")` splitst de inhoud van de `info`-kolom op het `;`-teken, zodat elke regel een lijst van losse onderdelen wordt.
+- De `sapply` loopt over alle regels heen, zoekt het onderdeel dat begint met `BCSQ=` (dat is de annotatie van `bcftools csq`) en bewaart alleen het eerste onderdeel daarvan. Als een regel geen annotatie heeft, komt daar `NA` uit.
+- Met `strsplit(..., "|", fixed=T)` wordt elke annotatie opgesplitst op het `|`-teken. `fixed=T` is nodig omdat `|` anders als speciaal teken in een regular expression wordt gezien.
+- Met `which(lapply(..., length) > 1)` selecteren we alleen de regels waar echt een annotatie was (een `NA` heeft lengte 1). Daarna pakt `[[` met `1` het eerste onderdeel (het mutatietype) en met `2` het tweede onderdeel (het gen) van elke annotatie.
+- Met `data.frame(do.call(rbind.data.frame, ...))` zetten we de lijst met mutatietypes om naar een data frame, en met `jy304_df$gene <- do.call(rbind, ...)` voegen we de genen er als tweede kolom aan toe. Met `colnames` geven we de kolommen de namen `mutation` en `gene`.
+- Daarna lezen we met `read.table(..., header = TRUE, sep = ";")` het csv-bestand in met de genen uit het artikel (Table 2 van PLOS ONE pone.0239528), en tonen we het bestand door `genen_onderzoek` te typen.
+- Tot slot geeft `intersect(...)` de genen die in beide lijsten staan, dus de mutaties die in genen liggen waar het artikel iets over zegt. We doen dit twee keer: één keer op de gennaam (`Gene_name`) en één keer op de systematische naam (`Systematic_Name`), omdat een gen in de ene lijst op een andere manier genoemd kan worden dan in de andere.
+
+### Resultaten
+We hebben de volledige code nu gerund op de complete dataset. Hieruit kwamen bij beide intersecties geen overeenkomsten tussen `variant_annotation_jy304` en de tabel van de onderzoekers.
+
+We hebben dezelfde code ook gerund op de subset. Ook daar vonden we geen overeenkomsten, maar er kwamen wel meer mutaties uit dan bij de volledige dataset.
+
+### Conclusie en vervolgstappen
+We zijn technisch gezien klaar: we hebben ons doel bereikt, namelijk het vergelijken van de pre-stress jy304 en het wildtype met de genen die volgens de onderzoekers invloed hebben op alcoholresistentie.
+
+Er bleken echter geen genen overeen te komen met die van de onderzoekers, noch bij de subset, noch bij de volledige dataset. Bij de subset vonden we wel meer mutaties dan bij de volledige dataset. Dit komt waarschijnlijk doordat we bij de volledige dataset alle data hebben meegenomen, waardoor de selectie strenger is. De 5 mutaties die we wel hebben gevonden zouden nog in de dataset van de onderzoekers kunnen vallen, maar omdat wij maar 40 van de 923 genen hebben, kunnen we dit niet controleren. Ook hebben we nog geen reactie gekregen van de onderzoeker die we hebben gemaild.
+
+Een andere mogelijke verklaring is dat de alcoholresistentie wordt veroorzaakt door mutaties in delen van het genoom die niet voor exonen coderen, bijvoorbeeld in intronen of promotorregio's. Die zouden we met onze huidige aanpak niet vinden.
+
+Een mogelijke vervolgstap is om de gevonden genen verder te onderzoeken en te kijken welke andere genen zij beïnvloeden. Het gen DAL81 is hierbij het interessantst, want dit is het enige gen waarin een missense-mutatie is opgetreden. Daardoor verandert het aminozuur in het eiwit waarvoor het gen codeert.
 
